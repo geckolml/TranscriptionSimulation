@@ -10,7 +10,7 @@
 #define ESC 27
 #define NUM_SPH     60
 #define NUM_ADN     15
-#define MAX 30
+#define MAX 15
 using namespace std;
 constexpr int SCREEN_WIDTH = 800;
 constexpr int SCREEN_HEIGHT = 500;
@@ -26,10 +26,12 @@ static char letras[20]="Temperatura: ";//impresion en pantalla
 static char disp_temperatura[10]="25.4"; // Valor de la temperatura en la pantalla
 
 
-//static char nucleotido[MAX]; // Hebra de nucleotidos ADN
-//static char comp_nucleotido[MAX]; // Hebra complementaria
-static char marNucleotidos[MAX]="ATGTGCGTGCGTAGTACGTC"; // mar de nucleotidos
+static char nucleotido[MAX]; // Hebra de nucleotidos ADN
+static char comp_nucleotido[MAX]; // Hebra complementaria
+static char mar[2*MAX]; // mar de nucleotidos
 static int NN;//numero de nucleotidos leidos
+static int MNN;//numero de nucleotidos leidos para el mar
+
 
 colores colore = {
 	{0.0, 0.0, 1.0, 1.0},
@@ -63,7 +65,8 @@ GLUquadric *quadObj;
 
 vector<TSphere> basesn;
 vector<TSphere> complementos;
-vector<TSphere> hidrogenos;
+vector<TSphere> hidro;
+vector<TSphere> marnucl;
 TSphere * bases[NUM_SPH];					//Dibujara la esfera
 float lx = 0.0, ly = 12.0; 				//Posiciones de la camara
 float r=12.0;						//Distancia de la camara con respecto al centro de la tierra
@@ -100,28 +103,41 @@ void calcNN(){
 void hidrogenos(){
   for(int i=0; i<NN;i++){
     TSphere bas(5,((random() % 10)/(float)25)+0.1,0.05,'H');
-    hidrog.push_back (bas);
+    hidro.push_back (bas);
   }
 }
 
 void complementario(){
   for(int i =0; i < NN;i++){
     TSphere bas(5,((random() % 10)/(float)25)+0.1,0.2);
-     // bas.setcolor(nucleotido[i]);
     if(nucleotido[i]=='A'){
       bas.setcolor('T');
+      comp_nucleotido[i]='T';
     }
     if(nucleotido[i]=='T'){
       bas.setcolor('A');
+      comp_nucleotido[i]='A';
     }
     if(nucleotido[i]=='C'){
       bas.setcolor('G');
+      comp_nucleotido[i]='G';
     }
     if(nucleotido[i]=='G'){
       bas.setcolor('C');
+      comp_nucleotido[i]='C';
     }
     complementos.push_back (bas);
   }
+}
+
+void marInit(){
+  int ix;
+  for(int i=0; i<2*MAX && mar[i]!='\0';i++){
+    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.2,mar[i]);
+    marnucl.push_back (bas);
+    ix++;
+  }
+  MNN=ix;
 }
 
 
@@ -132,6 +148,9 @@ bool init()
   FILE * fichero;
   fichero = fopen("cadenaADN.txt","rt");
   fgets(nucleotido,MAX,fichero);
+  fclose(fichero);
+  fichero = fopen("MarN.txt","rt");
+  fgets(mar,2*MAX,fichero);
   fclose(fichero);
   cout<<"========================================="<<endl;
   cout<<"Archivo cadenaADN.txt leído: "<<endl;
@@ -144,6 +163,13 @@ bool init()
   cout<<"Cadena de Nucleotidos Complementarios: "<<endl;
   cout<<comp_nucleotido<<endl;
   cout<<"========================================="<<endl;
+  cout<<"Archivo MarN.txt leido: "<<endl;
+  cout<<"Nucleotidos leidos para el mar de Nucleotidos: "<<endl;	
+  cout<<mar<<endl;
+  cout<<"Cadena de Nucleotidos Complementarios: "<<endl;
+  marInit();
+  cout<<"========================================="<<endl;
+  
   //Inicializamos SDL, video y audio
   srandom(time(NULL));
   if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -276,7 +302,6 @@ void handleKeys( SDL_Event& e )
       case SDLK_8: 
       if( Desna == 0 )
       {
-        //Play cancion
         Desna=1;
       }
       else Desna=0; break;
@@ -393,6 +418,107 @@ float mat_emission [] = {0.0,0.0,0.0,1.0};
 
 
 float torstep=2*Longi;
+
+void Giro(void){
+
+  GLfloat Ang=0;
+  glMaterialf(GL_FRONT,GL_SHININESS,0.5);
+        //glMaterialf(GL_FRONT,GL_SHININESS,mat_shininess);
+//glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, color);
+int j;
+float i=-Longi,ai=-Longi;
+float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
+   if(Desna==0&&Radio==RadioM)
+      DesAng+=0.001;
+   else if(Desna==1)
+      DesAng-=0.001;
+   
+   if(DesAng<0)
+      DesAng=0;
+   if(DesAng>DAng)
+      DesAng=DAng;
+
+   if(DesAng==0&&Desna==1)
+      Radio+=0.01;
+   if(DesAng==0&&Desna==0)
+      Radio-=0.01;
+   
+   if(Radio<RadioM)
+      Radio=RadioM;
+   if(Radio>2*RadioM)
+      Radio=2*RadioM;
+ 
+    pz = cos(Ang)*Radio;
+for(j=0;j<NN;){
+    px = -sin(Ang)*Radio;
+    pz = cos(Ang)*Radio;
+    Ang+=DesAng;
+    glPushMatrix();
+    
+    glTranslated(i, px, pz);
+basesn[j].render(quadObj);
+
+//bases[j++]->render(quadObj);
+    //gluSphere (quadObj, 0.2,8,8); // Esfera Nativa de Open GL
+    glPopMatrix();
+    glPushMatrix();
+    
+    glTranslated(i, -px, -pz);
+complementos[j].render(quadObj);
+//bases[j++]->render(quadObj);
+    //gluSphere (quadObj, 0.2,20,20); // Esfera Nativa de Open GL
+    glPopMatrix();
+    glBegin(GL_LINES);
+glLineWidth(10.0);
+j++;
+if(Radio==RadioM){
+glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.blanco);
+glVertex3f(i, px, pz);
+glVertex3f(i, -px, -pz);
+}
+glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+glVertex3f(ai, apx, apz);
+glVertex3f(i, px, pz);
+glVertex3f(ai, -apx, -apz);
+glVertex3f(i, -px, -pz);
+ai=i;
+apx=px;
+apz=pz;
+glEnd();
+	/*glDisable(GL_TEXTURE_GEN_S);
+	glDisable(GL_TEXTURE_GEN_T);*/
+    i+=step;
+}
+
+/*for (;j<NUM_SPH;j++)
+{
+glPushMatrix();
+pos = bases[j]->getPosv();
+glTranslatef(pos[0],pos[1],pos[2]);
+bases[j]->render(quadObj);
+glPopMatrix();
+bases[j]->test();
+}*/
+
+glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
+if(Radio==2*RadioM){
+glPushMatrix();
+  glTranslated(torstep,0,Radio);
+  glRotatef(90,0.0,1.0,0.0);
+  glutSolidTorus(0.25, 0.75, 28, 28);
+glPopMatrix();
+glPushMatrix();
+  glTranslated(-torstep,0,-Radio);
+  glRotatef(90,0.0,1.0,0.0);
+  glutSolidTorus(0.25, 0.75, 28, 28);
+glPopMatrix();
+torstep-=0.03;
+}
+
+  
+}
+
+
 void ADN(void){
 
   GLfloat Ang=0;
@@ -467,7 +593,6 @@ glEnd();
 /*for (;j<NUM_SPH;j++)
 {
 glPushMatrix();
-
 pos = bases[j]->getPosv();
 glTranslatef(pos[0],pos[1],pos[2]);
 bases[j]->render(quadObj);
