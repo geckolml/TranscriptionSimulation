@@ -131,7 +131,7 @@ void complementario(){
 }
 
 void marInit(){
-  int ix;
+  int ix=0;
   for(int i=0; i<2*MAX && mar[i]!='\0';i++){
     TSphere bas(5,((random() % 10)/(float)25)+0.1,0.2,mar[i]);
     marnucl.push_back (bas);
@@ -166,10 +166,8 @@ bool init()
   cout<<"Archivo MarN.txt leido: "<<endl;
   cout<<"Nucleotidos leidos para el mar de Nucleotidos: "<<endl;	
   cout<<mar<<endl;
-  cout<<"Cadena de Nucleotidos Complementarios: "<<endl;
-  marInit();
   cout<<"========================================="<<endl;
-  
+  marInit();
   //Inicializamos SDL, video y audio
   srandom(time(NULL));
   if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -518,16 +516,25 @@ torstep-=0.03;
   
 }
 
+void MarRender(){
+  for (int i=0;i<MNN;i++)
+  {
+    glPushMatrix();
+    pos = marnucl[i].getPosv();
+    glTranslatef(pos[0],pos[1],pos[2]);
+    marnucl[i].render(quadObj);
+    glPopMatrix();
+    marnucl[i].test();
+  }
+}
 
 void ADN(void){
 
   GLfloat Ang=0;
   glMaterialf(GL_FRONT,GL_SHININESS,0.5);
-        //glMaterialf(GL_FRONT,GL_SHININESS,mat_shininess);
-//glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, color);
-int j;
-float i=-Longi,ai=-Longi;
-float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
+  int j;
+  float i=-Longi,ai=-Longi;
+  float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
    if(Desna==0&&Radio==RadioM)
       DesAng+=0.001;
    else if(Desna==1)
@@ -590,15 +597,7 @@ glEnd();
     i+=step;
 }
 
-/*for (;j<NUM_SPH;j++)
-{
-glPushMatrix();
-pos = bases[j]->getPosv();
-glTranslatef(pos[0],pos[1],pos[2]);
-bases[j]->render(quadObj);
-glPopMatrix();
-bases[j]->test();
-}*/
+MarRender();
 
 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
 if(Radio==2*RadioM){
