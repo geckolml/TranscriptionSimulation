@@ -230,13 +230,6 @@ bool loadMedia()
 {
   bool success = true;
   //Se carga la musica
-  /*success=loadTextures();		//cargamos las imagenes
-  gMusic = Mix_LoadMUS( "odisea.mp3" );	//cargamos la musica
-  if( gMusic == NULL )
-  {
-    std::cerr << "Failed to load beat music! SDL_mixer Error: " << Mix_GetError() << std::endl;
-    success = false;
-  }*/	
   return success;
 }
 
