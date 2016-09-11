@@ -1,22 +1,24 @@
 #include <GL/glut.h>
 #include "sphere.h"
 //GLuint pass=0;
-float shininess=12;
+float shininess=18;
   GLfloat materialEmission[] = {0.0,0.0,0.0, 1.0};
   GLfloat materialSpecular[] = {0.3,0.3,0.3, 1.0};
 
 colores colo = {
-	{0.0, 0.0, 1.0, 1.0},
-	{1.0, 0.0, 0.0, 1.0},
-	{1.0, 1.0, 0.0, 1.0},
-	{0.0, 1.0, 0.0, 1.0},
+	{0.0f, 0.0f, 1.0f, 1.0f},
+	{1.0f, 0.0f, 0.0f, 1.0f},
+	{1.0f, 1.0f, 0.0f, 1.0f},
+	{0.0f, 1.0f, 0.0f, 1.0f},
 	{1.0f, 1.0f, 1.0f, 1.0f},
+	{0.5f, 0.5f, 0.5f, 0.5f},
 	{0.0f, 1.0f, 1.0f, 1.0f},
 	{0.5f, 0.0f, 0.5f, 1.0f}
 	};
 TSphere::TSphere(GLfloat maxpos, GLfloat speed, GLfloat r, char c)
 {
   radio=r;
+  dibujo=true;
   this->setcolor(c);
   this->maxpos = maxpos;
   pos[0] = (random() % (GLuint)maxpos) - maxpos/2;
@@ -37,6 +39,7 @@ TSphere::TSphere(GLfloat maxpos, GLfloat speed, GLfloat r, char c)
 TSphere::TSphere(GLfloat maxpos, GLfloat speed,GLfloat r)
 {
   radio=r;
+  dibujo=true;
   this->maxpos = maxpos;
   pos[0] = (random() % (GLuint)maxpos) - maxpos/2;
   pos[1] = (random() % (GLuint)maxpos) - maxpos/2;
@@ -56,6 +59,7 @@ TSphere::TSphere(GLfloat maxpos, GLfloat speed,GLfloat r)
 TSphere::TSphere(GLfloat r,char c)
 {
   radio=r;
+  dibujo=true;
   this->setcolor(c);
 }
 
@@ -78,9 +82,23 @@ void TSphere::setcolor(char C)
      color=colo.verde;
   }
   if(C=='H'){
-     color=colo.blanco;
+     color=colo.plomo;
+  }
+  if(C=='E'){
+     color=colo.morado;
   }
 }
+
+void TSphere::setpos(GLfloat x, GLfloat y, GLfloat z){
+  pos[0]=x;
+  pos[1]=y;
+  pos[2]=z;
+}
+
+void TSphere::setdibujo(bool v){
+  dibujo=v;
+}
+
 
 void TSphere::test()
 {
@@ -114,13 +132,38 @@ void TSphere::unlink()
 
 void TSphere::render(GLUquadric* g)
 {
+  if(dibujo){
+  glPushMatrix();
+  glTranslated(pos[0], pos[1], pos[2]);
   glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
   glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
   glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
   glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
-  gluSphere (g, radio,20,20);     
+  gluSphere (g, radio,20,20);
+  glPopMatrix();
+  }
 }
+//se usara para los puentes de hidrogeno
+void TSphere::render(GLUquadric* g, GLfloat x1, GLfloat y1, GLfloat z1)
+{
+  if(dibujo){
+  glPushMatrix();
+  glTranslated(pos[0], pos[1], pos[2]);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
+  glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
+  glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
+  gluSphere (g, radio,20,20);
+  glPopMatrix();
+  glBegin(GL_LINES);
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+  glVertex3f(x1, y1, z1);
+  glVertex3f(x1, -y1, -z1);
+  }
+}
+
 
 GLfloat * TSphere::getPosv()
 {
