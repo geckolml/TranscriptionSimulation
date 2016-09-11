@@ -12,6 +12,7 @@
 #define NUM_ADN     15
 #define MAX 15
 using namespace std;
+bool quit = false;
 constexpr int SCREEN_WIDTH = 800;
 constexpr int SCREEN_HEIGHT = 500;
 
@@ -61,18 +62,19 @@ GLfloat LightAmbient[]=	{ 0.2f, 0.2f, 0.2f, 1.0f };
 GLfloat LightDiffuse[]=	{ 0.6f, 0.6f, 0.6f, 1.0f };
 GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
 GLuint	fogMode[]= { GL_EXP, GL_EXP2, GL_LINEAR };	//Tipos de niebla
-GLuint fogfilter=1;					//Usado para el modo de niebla 
+GLuint fogfilter=1;					//Usado para el modo de niebla
+
 GLfloat	fogColor[4] = {0.5f,0.5f,0.5f,1.0f};
+float mat_emission [] = {0.0,0.0,0.0,1.0};
 GLUquadric *quadObj;
 
 vector<TSphere> basesn;
 vector<TSphere> complementos;
-//<<<<<<< HEAD
+
 vector<TSphere> hidrog;
-//=======
+
 vector<TSphere> hidro;
 vector<TSphere> marnucl;
-//>>>>>>> 8b9ede7e073a750f28c075bf51784cbb25329a64
 TSphere * bases[NUM_SPH];					//Dibujara la esfera
 float lx = 0.0, ly = 12.0; 				//Posiciones de la camara
 float r=12.0;						//Distancia de la camara con respecto al centro de la tierra
@@ -285,7 +287,7 @@ void handleKeys( SDL_Event& e )
       //case SDLK_LEFT: mVelX -= DOT_VEL; break;
       //case SDLK_RIGHT: mVelX += DOT_VEL; break;
       //case SDLK_P: break;
-      case SDLK_ESCAPE: exit(0); break;
+      case SDLK_ESCAPE: quit=true; break;
       case SDLK_MINUS: break;
       case SDLK_KP_MINUS: break;
       case SDLK_PLUS: break;
@@ -418,7 +420,7 @@ int Display_SetViewport(int width, int height) {
   glLoadIdentity();
   return 1;
 }
-float mat_emission [] = {0.0,0.0,0.0,1.0};
+
 
 
 float torstep=2*Longi;
@@ -667,7 +669,6 @@ int main(int argc, char *argv[]) {
       printf( "Failed to load media!\n" );
     }
     else{
-      bool quit = false;
       SDL_GL_MakeCurrent(displayWindow, context);
       quit=Display_InitGL();
       Display_SetViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
