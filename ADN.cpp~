@@ -19,7 +19,6 @@ constexpr int OPENGL_MAJOR_VERSION = 2;
 constexpr int OPENGL_MINOR_VERSION = 1;
 
 constexpr SDL_GLprofile OPENGL_PROFILE = SDL_GLprofile::SDL_GL_CONTEXT_PROFILE_CORE;
-
 // Titulos
 static char titulo[30]="Transcripcion del ADN"; // Titulo de la pantalla
 static char letras[20]="Temperatura: ";//impresion en pantalla
