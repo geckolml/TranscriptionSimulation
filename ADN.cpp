@@ -28,11 +28,9 @@ static char disp_temperatura[10]="25.4"; // Valor de la temperatura en la pantal
 
 static char nucleotido[MAX]; // Hebra de nucleotidos ADN
 static char comp_nucleotido[MAX]; // Hebra complementaria
-<<<<<<< HEAD
+
 static char marNucleotidos[MAX]="ATGTGCGTGCGTAGTACGTC"; // mar de nucleotidos
-=======
 static char mar[2*MAX]; // mar de nucleotidos
->>>>>>> 8b9ede7e073a750f28c075bf51784cbb25329a64
 static int NN;//numero de nucleotidos leidos
 static int MNN;//numero de nucleotidos leidos para el mar
 
