@@ -26,7 +26,6 @@ static char titulo[30]="Transcripcion del ADN"; // Titulo de la pantalla
 static char letras[20]="Temperatura: ";//impresion en pantalla
 static char disp_temperatura[10]="25.4"; // Valor de la temperatura en la pantalla
 
-
 static char nucleotido[MAX]; // Hebra de nucleotidos ADN
 static char comp_nucleotido[MAX]; // Hebra complementaria
 
@@ -35,13 +34,13 @@ static char mar[2*MAX]; // mar de nucleotidos
 static int NN;//numero de nucleotidos leidos
 static int MNN;//numero de nucleotidos leidos para el mar
 
-
 colores colore = {
-	{0.0, 0.0, 1.0, 1.0},
-	{1.0, 0.0, 0.0, 1.0},
-	{1.0, 1.0, 0.0, 1.0},
-	{0.0, 1.0, 0.0, 1.0},
+	{0.0f, 0.0f, 1.0f, 1.0f},
+	{1.0f, 0.0f, 0.0f, 1.0f},
+	{1.0f, 1.0f, 0.0f, 1.0f},
+	{0.0f, 1.0f, 0.0f, 1.0f},
 	{1.0f, 1.0f, 1.0f, 1.0f},
+        {1.0f, 1.0f, 1.0f, 1.0f},
 	{0.0f, 1.0f, 1.0f, 1.0f},
 	{0.5f, 0.0f, 0.5f, 1.0f}
 	};
@@ -51,7 +50,7 @@ GLuint Rev=2;
 
 GLfloat Longi=8;
 GLfloat step;
-GLfloat RadioM=2;
+GLfloat RadioM=1.5;
 GLfloat Radio=RadioM;
 GLfloat DAng;
 GLfloat DesAng;
@@ -60,7 +59,7 @@ GLfloat pz;
 
 GLfloat LightAmbient[]=	{ 0.2f, 0.2f, 0.2f, 1.0f };
 GLfloat LightDiffuse[]=	{ 0.6f, 0.6f, 0.6f, 1.0f };
-GLfloat LightPosition[]= { 0.0f, 0.0f, 2.0f, 1.0f };
+GLfloat LightPosition[]= { 0.0f, 2.0f, 0.0f, 1.0f };
 GLuint	fogMode[]= { GL_EXP, GL_EXP2, GL_LINEAR };	//Tipos de niebla
 GLuint fogfilter=1;					//Usado para el modo de niebla
 
@@ -70,15 +69,13 @@ GLUquadric *quadObj;
 
 vector<TSphere> basesn;
 vector<TSphere> complementos;
-
-vector<TSphere> hidrog;
-
 vector<TSphere> hidro;
 vector<TSphere> marnucl;
-TSphere * bases[NUM_SPH];					//Dibujara la esfera
-float lx = 0.0, ly = 12.0; 				//Posiciones de la camara
-float r=12.0;						//Distancia de la camara con respecto al centro de la tierra
-float deltaMove = 0.0; 					//Movimiento de la camara
+TSphere helicasa(0.5,'E');
+//TSphere * bases[NUM_SPH];					//Dibujara la esfera
+float lx = 0.0, ly = -10.0; 				//Posiciones de la camara
+float r=10.0;						//Distancia de la camara con respecto al centro de la tierra
+float deltaMove = 0.0;				//Movimiento de la camara
 float angle = 0.0; 					//Angulo de rotacion de la camara
 float deltaAngle = 0.0; 				//Angulo de cambio
 int isDragging = 0; 					//Mouse arrastrandose
@@ -110,7 +107,7 @@ void calcNN(){
 
 void hidrogenos(){
   for(int i=0; i<NN;i++){
-    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.05,'H');
+    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.1,'H');
     hidro.push_back (bas);
   }
 }
@@ -176,6 +173,7 @@ bool init()
   cout<<mar<<endl;
   cout<<"========================================="<<endl;
   marInit();
+  hidrogenos();
   //Inicializamos SDL, video y audio
   srandom(time(NULL));
   if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
@@ -220,52 +218,6 @@ bool init()
   }
   return success;
 }
-/*
-bool loadTextures() {
-  int i;
-  bool success=true;
-  glGenTextures(1, texID);	// Obtener el Id textura .
-  for (i = 0; i < 1; i++) {
-    void* imgData;		// Puntero a data del Archivo.
-    int imgWidth;		// Ancho de Imagen
-    int imgHeight;		// Alto.
-    FREE_IMAGE_FORMAT format = FreeImage_GetFIFFromFilename(textureFileNames[i]);
-    if (format == FIF_UNKNOWN) {
-      cout<<"Archivo de Imagen desconocido " << textureFileNames[i]<<endl;
-      success=false;
-      continue;
-    }
-    FIBITMAP* bitmap = FreeImage_Load(format, textureFileNames[i], 0);	//Leer Imagen.
-    if (!bitmap) {
-      cout<<"Fallo la carga de image "<< textureFileNames[i]<<endl;
-      success=false;
-      continue;
-    }
-    FIBITMAP* bitmap2 = FreeImage_ConvertTo24Bits(bitmap);	// Convierte a RGB
-    FreeImage_Unload(bitmap);
-    imgData = FreeImage_GetBits(bitmap2);
-    imgWidth = FreeImage_GetWidth(bitmap2);
-    imgHeight = FreeImage_GetHeight(bitmap2);
-    if (imgData) {
-      cout<<"Texture cargada "<<textureFileNames[i]<<", tamanio "<< imgWidth<<"x"<< imgHeight<<endl;
-      int format;		// Formato del color.
-      if ( FI_RGBA_RED == 0 )
-        format = GL_RGB;
-      else
-        format = GL_BGR;
-      glBindTexture( GL_TEXTURE_2D, texID[i] );	// Cargando textura
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, format,GL_UNSIGNED_BYTE, imgData);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-    else {
-      cout<<"Fallo la carga de textura "<< textureFileNames[i]<<endl;
-      success=false;
-    }
-  }
-  return success;
-}*/
-
 
 bool loadMedia()
 {
@@ -326,8 +278,8 @@ void handleKeys( SDL_Event& e )
       {
         deltaAngle = (x - xDragStart) * 0.005;
         //actualizamos la posicon de la camara
-        lx = -sin(angle + deltaAngle)*r;
-        ly = cos(angle + deltaAngle)*r;
+        lx = sin(angle + deltaAngle)*r;
+        ly = -cos(angle + deltaAngle)*r;
       }
       break;		
       case SDL_MOUSEBUTTONDOWN:
@@ -351,13 +303,12 @@ void perspectiveGL(GLdouble fovY, GLdouble aspect, GLdouble zNear, GLdouble zFar
 }
 
 void renderBitmapString(float x, float y, float z, void *font, char *string){
-	char *c;
-	glRasterPos3f(x,y,z);
-	for(c=string; *c != '\0';c++) {
-		glColor3f(1.0,1.0,1.0);
-		glutBitmapCharacter(font, *c);
-	}
-
+  char *c;
+  glRasterPos3f(x,y,z);
+  for(c=string; *c != '\0';c++) {
+    glColor3f(1.0,1.0,1.0);
+    glutBitmapCharacter(font, *c);
+  }
 }
 
 bool Display_InitGL() {
@@ -421,19 +372,33 @@ int Display_SetViewport(int width, int height) {
   return 1;
 }
 
-
+GLfloat AngInicial=0;
 
 float torstep=2*Longi;
 
-void Giro(void){
+void MarRender(){
+  for (int i=0;i<MNN;i++)
+  {
+    glPushMatrix();
+    //pos = marnucl[i].getPosv();
+    //glTranslatef(pos[0],pos[1],pos[2]);
+    marnucl[i].render(quadObj);
+    //glPopMatrix();
+    marnucl[i].test();
+  }
+}
+GLfloat helipos=-Longi*1.2;
 
+void Giro(void){
+glLineWidth(5.0);
+  int j;
   GLfloat Ang=0;
-  glMaterialf(GL_FRONT,GL_SHININESS,0.5);
-        //glMaterialf(GL_FRONT,GL_SHININESS,mat_shininess);
-//glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, color);
-int j;
-float i=-Longi,ai=-Longi;
-float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
+  float i=-Longi,ai=-Longi;
+  float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
+  if(AngInicial>2*M_PI)
+    AngInicial=0.0;
+  else
+    AngInicial+=0.004;
    if(Desna==0&&Radio==RadioM)
       DesAng+=0.001;
    else if(Desna==1)
@@ -455,57 +420,36 @@ float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
       Radio=2*RadioM;
  
     pz = cos(Ang)*Radio;
-for(j=0;j<NN;){
-    px = -sin(Ang)*Radio;
-    pz = cos(Ang)*Radio;
-    Ang+=DesAng;
-    glPushMatrix();
+    for(j=0;j<NN;j++){
+      px = -sin(Ang+AngInicial)*Radio;
+      pz = cos(Ang+AngInicial)*Radio;
+      Ang+=DesAng;
+      basesn[j].setpos(i, px, pz);
+      basesn[j].render(quadObj);
+      
+      complementos[j].setpos(i, -px, -pz);
+      complementos[j].render(quadObj);
     
-    glTranslated(i, px, pz);
-basesn[j].render(quadObj);
+      hidro[j].setpos(i, 0.0, 0.0);
+      hidro[j].render(quadObj,i, px, pz);
 
-//bases[j++]->render(quadObj);
-    //gluSphere (quadObj, 0.2,8,8); // Esfera Nativa de Open GL
-    glPopMatrix();
-    glPushMatrix();
-    
-    glTranslated(i, -px, -pz);
-complementos[j].render(quadObj);
-//bases[j++]->render(quadObj);
-    //gluSphere (quadObj, 0.2,20,20); // Esfera Nativa de Open GL
-    glPopMatrix();
-    glBegin(GL_LINES);
-glLineWidth(10.0);
-j++;
-if(Radio==RadioM){
-glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.blanco);
-glVertex3f(i, px, pz);
-glVertex3f(i, -px, -pz);
-}
-glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
-glVertex3f(ai, apx, apz);
-glVertex3f(i, px, pz);
-glVertex3f(ai, -apx, -apz);
-glVertex3f(i, -px, -pz);
-ai=i;
-apx=px;
-apz=pz;
-glEnd();
-	/*glDisable(GL_TEXTURE_GEN_S);
-	glDisable(GL_TEXTURE_GEN_T);*/
-    i+=step;
-}
+      glBegin(GL_LINES);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+      glVertex3f(ai, apx, apz);
+      glVertex3f(i, px, pz);
+      glVertex3f(ai, -apx, -apz);
+      glVertex3f(i, -px, -pz);
+      ai=i;
+      apx=px;
+      apz=pz;
+      glEnd();
+      i+=step;
+    }
 
-/*for (;j<NUM_SPH;j++)
-{
-glPushMatrix();
-pos = bases[j]->getPosv();
-glTranslatef(pos[0],pos[1],pos[2]);
-bases[j]->render(quadObj);
-glPopMatrix();
-bases[j]->test();
-}*/
-
+MarRender();
+helicasa.setpos(helipos, 0.0, 0.0);
+helicasa.render(quadObj);
+helipos+=0.05;
 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
 if(Radio==2*RadioM){
 glPushMatrix();
@@ -524,17 +468,6 @@ torstep-=0.03;
   
 }
 
-void MarRender(){
-  for (int i=0;i<MNN;i++)
-  {
-    glPushMatrix();
-    pos = marnucl[i].getPosv();
-    glTranslatef(pos[0],pos[1],pos[2]);
-    marnucl[i].render(quadObj);
-    glPopMatrix();
-    marnucl[i].test();
-  }
-}
 
 void ADN(void){
 
@@ -584,7 +517,7 @@ complementos[j].render(quadObj);
     //gluSphere (quadObj, 0.2,20,20); // Esfera Nativa de Open GL
     glPopMatrix();
     glBegin(GL_LINES);
-glLineWidth(10.0);
+//glLineWidth(20.0);
 j++;
 if(Radio==RadioM){
 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.blanco);
@@ -633,7 +566,8 @@ void Display_Render(SDL_Window* displayWindow) {
   gluLookAt(lx, ly, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
   //glBindTexture(GL_TEXTURE_2D, texID[0]);
   //gluSphere (quadObj, 4,40,40);
-  ADN();
+  Giro();
+  //ADN();
   SDL_GL_SwapWindow(displayWindow);//Actualiza el dibujo
 }
 
@@ -650,9 +584,8 @@ void update(void)
 {
   if (deltaMove) { // update camera position
     r += -(float)deltaMove * 0.1;
-    lx = -sin(angle/* + deltaAngle*/)*r;
-    ly = cos(angle/* + deltaAngle*/)*r;
-    //ly += deltaMove * 0.1;
+    lx = sin(angle)*r;
+    ly = -cos(angle)*r;
   }
 }
 
