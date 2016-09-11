@@ -25,8 +25,8 @@ static char letras[20]="Temperatura: ";//impresion en pantalla
 static char disp_temperatura[10]="25.4"; // Valor de la temperatura en la pantalla
 
 
-static char nucleotido[MAX]; // Hebra de nucleotidos ADN
-static char comp_nucleotido[MAX]; // Hebra complementaria
+//static char nucleotido[MAX]; // Hebra de nucleotidos ADN
+//static char comp_nucleotido[MAX]; // Hebra complementaria
 static char marNucleotidos[MAX]="ATGTGCGTGCGTAGTACGTC"; // mar de nucleotidos
 static int NN;//numero de nucleotidos leidos
 
@@ -40,15 +40,15 @@ colores colore = {
 	{0.5f, 0.0f, 0.5f, 1.0f}
 	};
 
-GLuint Desna=0;
+GLuint Desna=0;//sirve para desnaturalizar la cadena al presionar 9
 GLuint Rev=2;
 
 GLfloat Longi=8;
-GLfloat step=2*Longi/(NUM_ADN-1);
+GLfloat step;
 GLfloat RadioM=2;
 GLfloat Radio=RadioM;
-GLfloat DAng=(Rev* M_PI)/(GLfloat)(NUM_ADN-1);
-GLfloat DesAng=DAng;
+GLfloat DAng;
+GLfloat DesAng;
 GLfloat px;
 GLfloat pz;
 
@@ -62,6 +62,7 @@ GLUquadric *quadObj;
 
 vector<TSphere> basesn;
 vector<TSphere> complementos;
+vector<TSphere> hidrogenos;
 TSphere * bases[NUM_SPH];					//Dibujara la esfera
 float lx = 0.0, ly = 12.0; 				//Posiciones de la camara
 float r=12.0;						//Distancia de la camara con respecto al centro de la tierra
@@ -73,9 +74,6 @@ int xDragStart = 0; 					//Guarda la posicion del mouse cuando se arrastra
 GLuint texID[1];					//ID de la textura de la tierra
 SDL_Window* displayWindow=NULL;				//Ventana principal
 SDL_GLContext context;					//Aqui se dibuja
-/*char* textureFileNames[1] = {
-  "mundo.bmp"
-};*/
 
 bool init();
 
@@ -93,10 +91,20 @@ void calcNN(){
     ix++;
   }
   NN=ix;
+  step=2*Longi/(NN-1);
+  DAng=(Rev* M_PI)/(GLfloat)(NN-1);
+  DesAng=DAng;
+}
+
+void hidrogenos(){
+  for(int i=0; i<NN;i++){
+    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.05,'H');
+    hidrog.push_back (bas);
+  }
 }
 
 void complementario(){
-  for(int i =0; i < NN && nucleotido[i]!='\0';i++){
+  for(int i =0; i < NN;i++){
     TSphere bas(5,((random() % 10)/(float)25)+0.1,0.2);
      // bas.setcolor(nucleotido[i]);
     if(nucleotido[i]=='A'){
