@@ -26,8 +26,8 @@ static char letras[20]="Temperatura: ";//impresion en pantalla
 static char disp_temperatura[10]="25.4"; // Valor de la temperatura en la pantalla
 
 
-//static char nucleotido[MAX]; // Hebra de nucleotidos ADN
-//static char comp_nucleotido[MAX]; // Hebra complementaria
+static char nucleotido[MAX]; // Hebra de nucleotidos ADN
+static char comp_nucleotido[MAX]; // Hebra complementaria
 static char marNucleotidos[MAX]="ATGTGCGTGCGTAGTACGTC"; // mar de nucleotidos
 static int NN;//numero de nucleotidos leidos
 
@@ -63,7 +63,7 @@ GLUquadric *quadObj;
 
 vector<TSphere> basesn;
 vector<TSphere> complementos;
-vector<TSphere> hidrogenos;
+vector<TSphere> hidrog;
 TSphere * bases[NUM_SPH];					//Dibujara la esfera
 float lx = 0.0, ly = 12.0; 				//Posiciones de la camara
 float r=12.0;						//Distancia de la camara con respecto al centro de la tierra
