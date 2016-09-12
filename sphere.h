@@ -32,21 +32,28 @@ private:
   GLfloat dir[3];
   GLfloat speed;
   GLfloat* color;
+  char colorpar;
 public:
   TSphere(GLfloat maxpos, GLfloat speed,GLfloat r);
   TSphere(GLfloat maxpos, GLfloat speed, GLfloat r,char c);
   TSphere(GLfloat r,char c);
+  TSphere(GLfloat r);
   ~TSphere();
   void test();
   void setdibujo(bool v);
   void setcolor(char c);
   void setpos(GLfloat x, GLfloat y, GLfloat z);
+  void setparada(GLfloat x, GLfloat y, GLfloat z, GLfloat s);
+  void setdir();
+  void setcompara(bool v);
   void stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s);
   void link();
-  void unlink();
   void render(GLUquadric* g);
   void render(GLUquadric* g, GLfloat x1, GLfloat y1, GLfloat z1);
   //void modifySpeed(float inc);
   float * getPosv();
+  float getx();
+  bool getparada();
+  char getcolorpar();
 };
 #endif
