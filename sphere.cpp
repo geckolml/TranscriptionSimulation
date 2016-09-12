@@ -17,6 +17,8 @@ colores colo = {
 	};
 TSphere::TSphere(GLfloat maxpos, GLfloat speed, GLfloat r, char c)
 {
+  compara=false;
+  alto=false;
   radio=r;
   dibujo=true;
   this->setcolor(c);
@@ -38,6 +40,8 @@ TSphere::TSphere(GLfloat maxpos, GLfloat speed, GLfloat r, char c)
 
 TSphere::TSphere(GLfloat maxpos, GLfloat speed,GLfloat r)
 {
+  compara=false;
+  alto=false;
   radio=r;
   dibujo=true;
   this->maxpos = maxpos;
@@ -58,6 +62,8 @@ TSphere::TSphere(GLfloat maxpos, GLfloat speed,GLfloat r)
 
 TSphere::TSphere(GLfloat r,char c)
 {
+  compara=false;
+  alto=false;
   radio=r;
   dibujo=true;
   this->setcolor(c);
@@ -88,11 +94,29 @@ void TSphere::setcolor(char C)
      color=colo.morado;
   }
 }
+void TSphere::stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s)
+{
+  parada[0]=x;
+  parada[1]=y;
+  parada[2]=z;
+  del=s;
+  compara=true;
+}
 
 void TSphere::setpos(GLfloat x, GLfloat y, GLfloat z){
-  pos[0]=x;
-  pos[1]=y;
-  pos[2]=z;
+  if(!alto){
+    pos[0]=x;
+    pos[1]=y;
+    pos[2]=z;
+  if(compara)
+  if((pos[0]>(parada[0]-del))&&
+  (pos[1]>(parada[1]-del))&&
+  (pos[2]>(parada[2]-del))&&
+  (pos[0]<(parada[0]+del))&&
+  (pos[1]<(parada[1]+del))&&
+  (pos[2]<(parada[2]+del)))
+    alto=true;
+  }
 }
 
 void TSphere::setdibujo(bool v){
@@ -155,12 +179,15 @@ void TSphere::render(GLUquadric* g, GLfloat x1, GLfloat y1, GLfloat z1)
   glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
   glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
   glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
-  gluSphere (g, radio,20,20);
+  gluSphere (g, radio,20,20);  
   glPopMatrix();
+
   glBegin(GL_LINES);
   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 25);
   glVertex3f(x1, y1, z1);
   glVertex3f(x1, -y1, -z1);
+  glEnd();
   }
 }
 
