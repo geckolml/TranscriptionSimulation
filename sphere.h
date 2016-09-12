@@ -40,11 +40,13 @@ public:
   TSphere(GLfloat r);
   ~TSphere();
   void test();
+  void renderBitmapString(float x, float y, float z, void *font, char *string);
   void setdibujo(bool v);
   void setcolor(char c);
   void setpos(GLfloat x, GLfloat y, GLfloat z);
   void setparada(GLfloat x, GLfloat y, GLfloat z, GLfloat s);
   void setdir();
+  void setlugar();
   void setcompara(bool v);
   void stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s);
   void link();

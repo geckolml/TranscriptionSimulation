@@ -11,7 +11,7 @@
 #define NUM_SPH     60
 #define NUM_ADN     15
 #define MAX 20
-#define MAXMAR 40
+#define MAXMAR 41
 using namespace std;
 bool quit = false;
 constexpr int SCREEN_WIDTH = 800;
@@ -31,7 +31,7 @@ static char nucleotido[MAX]; // Hebra de nucleotidos ADN
 static char comp_nucleotido[MAX]; // Hebra complementaria
 
 static char marNucleotidos[MAX];//="ATGTGCGTGCGTAGTACGTC"; // mar de nucleotidos
-static char mar[2*MAX]; // mar de nucleotidos
+static char mar[MAXMAR]; // mar de nucleotidos
 static int NN;//numero de nucleotidos leidos
 static int MNN;//numero de nucleotidos leidos para el mar
 
@@ -49,7 +49,7 @@ GLuint Estado=0;
 GLuint Desna=0;//sirve para desnaturalizar la cadena al presionar 9
 GLuint Rev=3;
 
-GLfloat Longi=7;
+GLfloat Longi=6;
 GLfloat step;
 GLfloat RadioM=1.5;
 GLfloat Radio=RadioM;
@@ -109,8 +109,8 @@ void calcNN(){
   step=2*Longi/(NN-1);
   DAng=(Rev* M_PI)/(GLfloat)(NN-1);
   DesAng=DAng;
-  veltor=(step*velmar)/(espacio+1.0);
-  velgiro=0.01f;
+  veltor=(step*velmar)/(2*espacio);
+  velgiro=0.05f;
   paso=(DAng*100.0);
   velhe=(step)/(paso);
 }
@@ -166,7 +166,7 @@ bool init()
   fgets(nucleotido,MAX,fichero);
   fclose(fichero);
   fichero = fopen("MarN.txt","rt");
-  fgets(mar,MAXMAR+1,fichero);
+  fgets(mar,MAXMAR,fichero);
   fclose(fichero);
   cout<<"========================================="<<endl;
   cout<<"Archivo cadenaADN.txt leído: "<<endl;
@@ -385,7 +385,7 @@ int Display_SetViewport(int width, int height) {
 
 GLfloat AngInicial=0;
 
-float torstep=2*Longi;
+float torstep=1.5*Longi;
 
 void MarRender(){
   for (int i=0;i<MNN;i++)
@@ -504,19 +504,24 @@ void Poli(void){
     cont=true;
     basesn[j].render(quadObj);
     p=basesn[j].getx();
-    if((-torstep-0.02)<p&&(-torstep+0.02)>p){
+    if((-torstep-0.12)<p&&(-torstep+0.2)>p){
+      //if(-torstep>p){
+      //  marnucl[j].setlugar();}
       if(false==marnucl[j].getparada()){
         marnucl[j].setdir();
         marnucl[j].setcompara(true);
       }
+      
     }
     complementos[j].render(quadObj);
-    p=complementos[j].getx();
-    if((torstep-0.02)<-p&&(torstep+0.02)>-p){
+    if((torstep-0.2)<-p&&(torstep+0.12)>-p){
+      //if(torstep<-p)
+        //marnucl[NN+j].setlugar();
       if(false==marnucl[NN+j].getparada()){
         marnucl[NN+j].setdir();
         marnucl[NN+j].setcompara(true);
       }
+      
     }
     if(j>0){
     glBegin(GL_LINES);

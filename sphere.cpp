@@ -106,6 +106,7 @@ void TSphere::setcolor(char C)
   if(C=='E'){
      color=colo.morado;
   }
+	
 }
 void TSphere::stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s)
 {
@@ -142,6 +143,16 @@ void TSphere::setparada(GLfloat x, GLfloat y, GLfloat z,  GLfloat s){
   parada[2]=z;
   del=s;
 }
+
+void TSphere::renderBitmapString(float x, float y, float z, void *font, char *string){
+  char *c;
+  glRasterPos3f(x,y,z);
+  for(c=string; *c != '\0';c++) {
+    glColor3f(1.0,1.0,1.0);
+    glutBitmapCharacter(font, *c);
+  }
+}
+
 
 void TSphere::setdibujo(bool v){
   dibujo=v;
@@ -189,6 +200,13 @@ void TSphere::test()
   }
 }
 
+void TSphere::setlugar(){
+    pos[0] = parada[0];
+    pos[1] = parada[1];
+    pos[2] = parada[2];
+}
+
+
 void TSphere::link()
 {
   ((pos[0] < -maxpos) || (pos[0] > maxpos))?dir[0]*=-1:0;
@@ -202,6 +220,12 @@ void TSphere::link()
 
 void TSphere::render(GLUquadric* g)
 {
+  char ms[30]="";
+  if(colorpar=='A')ms[0]='T';
+  else if(colorpar=='T')ms[0]='A';
+  else if(colorpar=='G')ms[0]='C';
+  else if(colorpar=='C')ms[0]='G';
+  else ms[0]=colorpar;
   if(dibujo){
   glPushMatrix();
   glTranslated(pos[0], pos[1], pos[2]);
@@ -211,6 +235,7 @@ void TSphere::render(GLUquadric* g)
   glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
   glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
   gluSphere (g, radio,20,20);
+//  renderBitmapString(0,0.4,0,GLUT_BITMAP_HELVETICA_10,ms);
   glPopMatrix();
   }
 }
