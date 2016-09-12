@@ -15,12 +15,13 @@ colores colo = {
 	{0.0f, 1.0f, 1.0f, 1.0f},
 	{0.5f, 0.0f, 0.5f, 1.0f}
 	};
-TSphere::TSphere(GLfloat maxpos, GLfloat speed, GLfloat r, char c)
+TSphere::TSphere(GLfloat maxpos, GLfloat sp, GLfloat r, char c)
 {
   compara=false;
   alto=false;
   radio=r;
   dibujo=true;
+  speed=sp;
   this->setcolor(c);
   this->maxpos = maxpos;
   pos[0] = (random() % (GLuint)maxpos) - maxpos/2;
@@ -69,6 +70,14 @@ TSphere::TSphere(GLfloat r,char c)
   this->setcolor(c);
 }
 
+TSphere::TSphere(GLfloat r)
+{
+  compara=false;
+  alto=false;
+  radio=r;
+  dibujo=true;
+}
+
 TSphere::~TSphere()
 {
 }
@@ -76,16 +85,20 @@ TSphere::~TSphere()
 void TSphere::setcolor(char C)
 {
   if(C=='A'){
-      color=colo.azul;
+    color=colo.azul;
+    colorpar='T';
   }
   if(C=='T'){
-      color=colo.amarillo;
+    color=colo.amarillo;
+    colorpar='A'; 
   }
   if(C=='C'){
-     color=colo.rojo;
+    color=colo.rojo;
+    colorpar='G';
   }
   if(C=='G'){
-     color=colo.verde;
+    color=colo.verde;
+    colorpar='C';
   }
   if(C=='H'){
      color=colo.plomo;
@@ -119,19 +132,61 @@ void TSphere::setpos(GLfloat x, GLfloat y, GLfloat z){
   }
 }
 
+void TSphere::setcompara(bool v){
+  compara=v;
+}
+
+void TSphere::setparada(GLfloat x, GLfloat y, GLfloat z,  GLfloat s){
+  parada[0]=x;
+  parada[1]=y;
+  parada[2]=z;
+  del=s;
+}
+
 void TSphere::setdibujo(bool v){
   dibujo=v;
 }
 
+void TSphere::setdir(){
+  dir[0] = parada[0]-pos[0];
+  dir[1] = parada[1]-pos[1];
+  dir[2] = parada[2]-pos[2];
+  GLfloat dirmod =sqrt(dir[0]*dir[0]+dir[1]*dir[1]+dir[2]*dir[2]);
+  dir[0] /= dirmod;
+  dir[1] /= dirmod;
+  dir[2] /= dirmod;
+  dir[0] *= speed;
+  dir[1] *= speed;
+  dir[2] *= speed;
+}
+
+char TSphere::getcolorpar(){
+  return colorpar;
+}
+
 
 void TSphere::test()
-{
+{if(!alto){
   ((pos[0] < -maxpos) || (pos[0] > maxpos))?dir[0]*=-1:0;
   ((pos[1] < -maxpos) || (pos[1] > maxpos))?dir[1]*=-1:0;
   ((pos[2] < -maxpos) || (pos[2] > maxpos))?dir[2]*=-1:0;
-  pos[0] += dir[0];
-  pos[1] += dir[1];
-  pos[2] += dir[2];
+  
+    pos[0] += dir[0];
+    pos[1] += dir[1];
+    pos[2] += dir[2];
+  if(compara)
+  if((pos[0]>(parada[0]-del))&&
+  (pos[1]>(parada[1]-del))&&
+  (pos[2]>(parada[2]-del))&&
+  (pos[0]<(parada[0]+del))&&
+  (pos[1]<(parada[1]+del))&&
+  (pos[2]<(parada[2]+del)))
+    alto=true;
+    if(alto){
+    pos[0] = parada[0];
+    pos[1] = parada[1];
+    pos[2] = parada[2];}
+  }
 }
 
 void TSphere::link()
@@ -144,15 +199,6 @@ void TSphere::link()
   pos[2] += dir[2];
 }
 
-void TSphere::unlink()
-{
-  ((pos[0] < -maxpos) || (pos[0] > maxpos))?dir[0]*=-1:0;
-  ((pos[1] < -maxpos) || (pos[1] > maxpos))?dir[1]*=-1:0;
-  ((pos[2] < -maxpos) || (pos[2] > maxpos))?dir[2]*=-1:0;
-  pos[0] += dir[0];
-  pos[1] += dir[1];
-  pos[2] += dir[2];
-}
 
 void TSphere::render(GLUquadric* g)
 {
@@ -191,6 +237,16 @@ void TSphere::render(GLUquadric* g, GLfloat x1, GLfloat y1, GLfloat z1)
   }
 }
 
+
+bool TSphere::getparada()
+{
+  return alto;
+}
+
+GLfloat TSphere::getx()
+{
+  return pos[0];
+}
 
 GLfloat * TSphere::getPosv()
 {
