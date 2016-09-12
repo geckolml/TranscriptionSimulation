@@ -22,10 +22,13 @@ class TSphere
 {
 private:
   bool dibujo;
+  bool alto;
+  bool compara;
   TSphere * par;
-  GLfloat radio;
+  GLfloat radio,del;
   GLfloat maxpos;
   GLfloat pos[3];
+  GLfloat parada[3];
   GLfloat dir[3];
   GLfloat speed;
   GLfloat* color;
@@ -38,6 +41,7 @@ public:
   void setdibujo(bool v);
   void setcolor(char c);
   void setpos(GLfloat x, GLfloat y, GLfloat z);
+  void stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s);
   void link();
   void unlink();
   void render(GLUquadric* g);
