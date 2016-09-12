@@ -11,6 +11,7 @@
 #define NUM_SPH     60
 #define NUM_ADN     15
 #define MAX 20
+#define MAXMAR 40
 using namespace std;
 bool quit = false;
 constexpr int SCREEN_WIDTH = 800;
@@ -48,7 +49,7 @@ GLuint Estado=0;
 GLuint Desna=0;//sirve para desnaturalizar la cadena al presionar 9
 GLuint Rev=3;
 
-GLfloat Longi=8;
+GLfloat Longi=7;
 GLfloat step;
 GLfloat RadioM=1.5;
 GLfloat Radio=RadioM;
@@ -59,6 +60,8 @@ GLfloat pz;
 GLfloat velgiro;
 GLfloat paso;
 GLfloat velhe;
+GLfloat veltor;
+GLfloat espacio=8;
 
 GLfloat LightAmbient[]=	{ 0.2f, 0.2f, 0.2f, 1.0f };
 GLfloat LightDiffuse[]=	{ 0.6f, 0.6f, 0.6f, 1.0f };
@@ -86,7 +89,7 @@ int xDragStart = 0; 					//Guarda la posicion del mouse cuando se arrastra
 GLuint texID[1];					//ID de la textura de la tierra
 SDL_Window* displayWindow=NULL;				//Ventana principal
 SDL_GLContext context;					//Aqui se dibuja
-
+float velmar = 0.2; 	
 bool init();
 
 //bool loadTextures();
@@ -98,7 +101,7 @@ void handleKeys( SDL_Event& e );
 void calcNN(){
   int ix=0;
   for(int i=0; i<MAX && nucleotido[i]!='\0';i++){
-    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.2,nucleotido[i]);
+    TSphere bas(0.2,nucleotido[i]);
     basesn.push_back (bas);
     ix++;
   }
@@ -106,6 +109,7 @@ void calcNN(){
   step=2*Longi/(NN-1);
   DAng=(Rev* M_PI)/(GLfloat)(NN-1);
   DesAng=DAng;
+  veltor=(step*velmar)/(espacio+1.0);
   velgiro=0.01f;
   paso=(DAng*100.0);
   velhe=(step)/(paso);
@@ -113,14 +117,14 @@ void calcNN(){
 
 void hidrogenos(){
   for(int i=0; i<NN;i++){
-    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.1,'H');
+    TSphere bas(0.1,'H');
     hidro.push_back (bas);
   }
 }
 
 void complementario(){
   for(int i =0; i < NN;i++){
-    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.2);
+    TSphere bas(0.2);
     if(nucleotido[i]=='A'){
       bas.setcolor('T');
       comp_nucleotido[i]='T';
@@ -143,8 +147,8 @@ void complementario(){
 
 void marInit(){
   int ix=0;
-  for(int i=0; i<2*MAX && mar[i]!='\0';i++){
-    TSphere bas(5,((random() % 10)/(float)25)+0.1,0.2,mar[i]);
+  for(int i=0; i<MAXMAR && mar[i]!='\0';i++){
+    TSphere bas(espacio,velmar,0.2,mar[i]);
     marnucl.push_back (bas);
     ix++;
   }
@@ -155,13 +159,14 @@ void marInit(){
 // Dibujar
 bool init()
 {
+  srandom(time(NULL));
   bool success = true;
   FILE * fichero;
   fichero = fopen("cadenaADN.txt","rt");
   fgets(nucleotido,MAX,fichero);
   fclose(fichero);
   fichero = fopen("MarN.txt","rt");
-  fgets(mar,2*MAX,fichero);
+  fgets(mar,MAXMAR+1,fichero);
   fclose(fichero);
   cout<<"========================================="<<endl;
   cout<<"Archivo cadenaADN.txt leído: "<<endl;
@@ -181,7 +186,7 @@ bool init()
   marInit();
   hidrogenos();
   //Inicializamos SDL, video y audio
-  srandom(time(NULL));
+  
   if( SDL_Init( SDL_INIT_VIDEO ) < 0 )
   {
     std::cerr << "There was an error initing SDL2: " << SDL_GetError() << std::endl;
@@ -386,14 +391,12 @@ void MarRender(){
   for (int i=0;i<MNN;i++)
   {
     glPushMatrix();
-    //pos = marnucl[i].getPosv();
-    //glTranslatef(pos[0],pos[1],pos[2]);
     marnucl[i].render(quadObj);
-    //glPopMatrix();
     marnucl[i].test();
   }
 }
-GLfloat helipos=-Longi*1.2;
+
+GLfloat helipos=-Longi*1.0;
 
 void Giro(void){
   int j;
@@ -440,7 +443,7 @@ void Helica(void){
   int j;
   GLfloat Ang=0;
   GLfloat i=-Longi,ai=-Longi;
-  //GLfloat apy= sin(Ang)*Radio,apz = cos(Ang)*Radio;
+  bool cont=true;
   if(AngInicial<-2*M_PI)
     AngInicial=0.0;
   else
@@ -450,7 +453,9 @@ void Helica(void){
     if(i<helipos+0.5){
       hidro[j].setdibujo(false);
       basesn[j].stop(i, 0.0, Radio,0.01);
+      marnucl[j].setparada(i, 0.0, Radio*0.4,0.6);
       complementos[j].stop(i, 0.0, -Radio,0.01);
+      marnucl[2*NN-j-1].setparada(i, 0.0, -Radio*0.4,0.6);
     }
    
     
@@ -458,6 +463,7 @@ void Helica(void){
     pz = cos(Ang+AngInicial)*Radio;
     Ang+=DesAng;
     basesn[j].setpos(i, py, pz);
+    cont=basesn[j].getparada();
     basesn[j].render(quadObj);
 
     complementos[j].setpos(i, -py, -pz);
@@ -476,19 +482,71 @@ void Helica(void){
     glEnd();
     }
     ai=i;
-    //apy=py;
-    //apz=pz;
-
     i+=step;
   }
-
+if(cont==true)
+ Estado=2;
 MarRender();
 helicasa.setpos(helipos, 0.0, 0.0);
 helicasa.render(quadObj);
 helipos+=velhe;
-cout<<velhe<<endl;
-//helipos+=0.01;
   
+}
+
+void Poli(void){
+  int j;
+  char c;
+  GLfloat p;
+  GLfloat i=-Longi,ai=-Longi;
+  bool cont;
+  
+  for(j=0;j<NN;j++){
+    cont=true;
+    basesn[j].render(quadObj);
+    p=basesn[j].getx();
+    if((-torstep-0.02)<p&&(-torstep+0.02)>p){
+      if(false==marnucl[j].getparada()){
+        marnucl[j].setdir();
+        marnucl[j].setcompara(true);
+      }
+    }
+    complementos[j].render(quadObj);
+    p=complementos[j].getx();
+    if((torstep-0.02)<-p&&(torstep+0.02)>-p){
+      if(false==marnucl[NN+j].getparada()){
+        marnucl[NN+j].setdir();
+        marnucl[NN+j].setcompara(true);
+      }
+    }
+    if(j>0){
+    glBegin(GL_LINES);
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+    glVertex3fv(basesn[j-1].getPosv());
+    glVertex3fv(basesn[j].getPosv());
+    glVertex3fv(complementos[j-1].getPosv());
+    glVertex3fv(complementos[j].getPosv());
+    glEnd();
+    }
+    i+=step;
+  }
+
+  MarRender();
+  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
+
+glPushMatrix();
+  glTranslated(-torstep,0,Radio);
+  glRotatef(90,0.0,1.0,0.0);
+  glutSolidTorus(0.4, 1.0, 28, 28);
+glPopMatrix();
+glPushMatrix();
+  glTranslated(torstep,0,-Radio);
+  glRotatef(90,0.0,1.0,0.0);
+  glutSolidTorus(0.4, 1.0, 28, 28);
+glPopMatrix();
+torstep-=veltor;
+  
+
 }
 void ADN(void){
 
@@ -564,16 +622,16 @@ MarRender();
 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
 if(Radio==2*RadioM){
 glPushMatrix();
-  glTranslated(torstep,0,Radio);
+  glTranslated(-torstep,0,Radio);
   glRotatef(90,0.0,1.0,0.0);
   glutSolidTorus(0.25, 0.75, 28, 28);
 glPopMatrix();
 glPushMatrix();
-  glTranslated(-torstep,0,-Radio);
+  glTranslated(torstep,0,-Radio);
   glRotatef(90,0.0,1.0,0.0);
   glutSolidTorus(0.25, 0.75, 28, 28);
 glPopMatrix();
-torstep-=0.03;
+torstep+=0.03;
 }
 
   
@@ -590,6 +648,7 @@ void Display_Render(SDL_Window* displayWindow) {
   switch(Estado){
   case 0: Giro(); break;
   case 1: Helica(); break;
+  case 2: Poli(); break;
   }
   //ADN();
   SDL_GL_SwapWindow(displayWindow);//Actualiza el dibujo
