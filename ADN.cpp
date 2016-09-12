@@ -10,7 +10,7 @@
 #define ESC 27
 #define NUM_SPH     60
 #define NUM_ADN     15
-#define MAX 15
+#define MAX 20
 using namespace std;
 bool quit = false;
 constexpr int SCREEN_WIDTH = 800;
@@ -44,9 +44,9 @@ colores colore = {
 	{0.0f, 1.0f, 1.0f, 1.0f},
 	{0.5f, 0.0f, 0.5f, 1.0f}
 	};
-
+GLuint Estado=0;
 GLuint Desna=0;//sirve para desnaturalizar la cadena al presionar 9
-GLuint Rev=2;
+GLuint Rev=3;
 
 GLfloat Longi=8;
 GLfloat step;
@@ -54,12 +54,15 @@ GLfloat RadioM=1.5;
 GLfloat Radio=RadioM;
 GLfloat DAng;
 GLfloat DesAng;
-GLfloat px;
+GLfloat py;
 GLfloat pz;
+GLfloat velgiro;
+GLfloat paso;
+GLfloat velhe;
 
 GLfloat LightAmbient[]=	{ 0.2f, 0.2f, 0.2f, 1.0f };
 GLfloat LightDiffuse[]=	{ 0.6f, 0.6f, 0.6f, 1.0f };
-GLfloat LightPosition[]= { 0.0f, 2.0f, 0.0f, 1.0f };
+GLfloat LightPosition[]= { 0.0f, -4.0f, 0.0f, 1.0f };
 GLuint	fogMode[]= { GL_EXP, GL_EXP2, GL_LINEAR };	//Tipos de niebla
 GLuint fogfilter=1;					//Usado para el modo de niebla
 
@@ -103,6 +106,9 @@ void calcNN(){
   step=2*Longi/(NN-1);
   DAng=(Rev* M_PI)/(GLfloat)(NN-1);
   DesAng=DAng;
+  velgiro=0.01f;
+  paso=(DAng*100.0);
+  velhe=(step)/(paso);
 }
 
 void hidrogenos(){
@@ -238,7 +244,7 @@ void handleKeys( SDL_Event& e )
       case SDLK_DOWN: deltaMove = -1.0; break;
       //case SDLK_LEFT: mVelX -= DOT_VEL; break;
       //case SDLK_RIGHT: mVelX += DOT_VEL; break;
-      //case SDLK_P: break;
+      case SDLK_c: Estado=1;break;
       case SDLK_ESCAPE: quit=true; break;
       case SDLK_MINUS: break;
       case SDLK_KP_MINUS: break;
@@ -325,7 +331,7 @@ bool Display_InitGL() {
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glLightfv(GL_LIGHT1, GL_AMBIENT, LightAmbient);	//Luz Ambiental
   glLightfv(GL_LIGHT1, GL_DIFFUSE, LightDiffuse);	//Luz Difusa
-  glLightfv(GL_LIGHT0, GL_SPECULAR, LightDiffuse);
+  glLightfv(GL_LIGHT1, GL_SPECULAR, LightDiffuse);
   glLightfv(GL_LIGHT1, GL_POSITION,LightPosition);	//Posicion de la luz
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT1);
@@ -341,7 +347,7 @@ bool Display_InitGL() {
   glFogf(GL_FOG_END, 5.0f);				// Fog End Depth
   glEnable(GL_FOG);
   //glEnable(GL_COLOR_MATERIAL);
-  
+  glLineWidth(5.0);
   if( error != GL_NO_ERROR )
   {
     printf( "Error initializing OpenGL! %s\n", gluErrorString( error ) );
@@ -390,92 +396,107 @@ void MarRender(){
 GLfloat helipos=-Longi*1.2;
 
 void Giro(void){
-glLineWidth(5.0);
   int j;
   GLfloat Ang=0;
-  float i=-Longi,ai=-Longi;
-  float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
-  if(AngInicial>2*M_PI)
+  GLfloat i=-Longi,ai=-Longi;
+  //GLfloat apy= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
+  if(AngInicial<-2*M_PI)
     AngInicial=0.0;
   else
-    AngInicial+=0.004;
-   if(Desna==0&&Radio==RadioM)
-      DesAng+=0.001;
-   else if(Desna==1)
-      DesAng-=0.001;
-   
-   if(DesAng<0)
-      DesAng=0;
-   if(DesAng>DAng)
-      DesAng=DAng;
+    AngInicial-=0.01;
 
-   if(DesAng==0&&Desna==1)
-      Radio+=0.01;
-   if(DesAng==0&&Desna==0)
-      Radio-=0.01;
-   
-   if(Radio<RadioM)
-      Radio=RadioM;
-   if(Radio>2*RadioM)
-      Radio=2*RadioM;
- 
-    pz = cos(Ang)*Radio;
-    for(j=0;j<NN;j++){
-      px = -sin(Ang+AngInicial)*Radio;
-      pz = cos(Ang+AngInicial)*Radio;
-      Ang+=DesAng;
-      basesn[j].setpos(i, px, pz);
-      basesn[j].render(quadObj);
-      
-      complementos[j].setpos(i, -px, -pz);
-      complementos[j].render(quadObj);
-    
-      hidro[j].setpos(i, 0.0, 0.0);
-      hidro[j].render(quadObj,i, px, pz);
+  for(j=0;j<NN;j++){
+    py = sin(Ang+AngInicial)*Radio;
+    pz = cos(Ang+AngInicial)*Radio;
+    Ang+=DesAng;
+    basesn[j].setpos(i, py, pz);
+    basesn[j].render(quadObj);
 
-      glBegin(GL_LINES);
-      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
-      glVertex3f(ai, apx, apz);
-      glVertex3f(i, px, pz);
-      glVertex3f(ai, -apx, -apz);
-      glVertex3f(i, -px, -pz);
-      ai=i;
-      apx=px;
-      apz=pz;
-      glEnd();
-      i+=step;
+    complementos[j].setpos(i, -py, -pz);
+    complementos[j].render(quadObj);
+
+    hidro[j].setpos(i, 0.0, 0.0);
+    hidro[j].render(quadObj,i, py, pz);
+    if(j>0){
+    glBegin(GL_LINES);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+    glVertex3fv(basesn[j-1].getPosv());
+    glVertex3fv(basesn[j].getPosv());
+    glVertex3fv(complementos[j-1].getPosv());
+    glVertex3fv(complementos[j].getPosv());
+    glEnd();
     }
+    ai=i;
+   // apy=py;
+   // apz=pz;
+
+    i+=step;
+  }
+  MarRender();
+}
+
+void Helica(void){
+  int j;
+  GLfloat Ang=0;
+  GLfloat i=-Longi,ai=-Longi;
+  //GLfloat apy= sin(Ang)*Radio,apz = cos(Ang)*Radio;
+  if(AngInicial<-2*M_PI)
+    AngInicial=0.0;
+  else
+    AngInicial-=0.01;
+
+  for(j=0;j<NN;j++){
+    if(i<helipos+0.5){
+      hidro[j].setdibujo(false);
+      basesn[j].stop(i, 0.0, Radio,0.01);
+      complementos[j].stop(i, 0.0, -Radio,0.01);
+    }
+   
+    
+    py = sin(Ang+AngInicial)*Radio;
+    pz = cos(Ang+AngInicial)*Radio;
+    Ang+=DesAng;
+    basesn[j].setpos(i, py, pz);
+    basesn[j].render(quadObj);
+
+    complementos[j].setpos(i, -py, -pz);
+    complementos[j].render(quadObj);
+
+    hidro[j].setpos(i, 0.0, 0.0);
+    hidro[j].render(quadObj,i, py, pz);
+    if(j>0){
+    glBegin(GL_LINES);
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+    glVertex3fv(basesn[j-1].getPosv());
+    glVertex3fv(basesn[j].getPosv());
+    glVertex3fv(complementos[j-1].getPosv());
+    glVertex3fv(complementos[j].getPosv());
+    glEnd();
+    }
+    ai=i;
+    //apy=py;
+    //apz=pz;
+
+    i+=step;
+  }
 
 MarRender();
 helicasa.setpos(helipos, 0.0, 0.0);
 helicasa.render(quadObj);
-helipos+=0.05;
-glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
-if(Radio==2*RadioM){
-glPushMatrix();
-  glTranslated(torstep,0,Radio);
-  glRotatef(90,0.0,1.0,0.0);
-  glutSolidTorus(0.25, 0.75, 28, 28);
-glPopMatrix();
-glPushMatrix();
-  glTranslated(-torstep,0,-Radio);
-  glRotatef(90,0.0,1.0,0.0);
-  glutSolidTorus(0.25, 0.75, 28, 28);
-glPopMatrix();
-torstep-=0.03;
-}
-
+helipos+=velhe;
+cout<<velhe<<endl;
+//helipos+=0.01;
   
 }
-
-
 void ADN(void){
 
   GLfloat Ang=0;
   glMaterialf(GL_FRONT,GL_SHININESS,0.5);
   int j;
   float i=-Longi,ai=-Longi;
-  float apx= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
+  float apy= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
    if(Desna==0&&Radio==RadioM)
       DesAng+=0.001;
    else if(Desna==1)
@@ -498,12 +519,12 @@ void ADN(void){
  
     pz = cos(Ang)*Radio;
 for(j=0;j<NN;){
-    px = -sin(Ang)*Radio;
+    py = -sin(Ang)*Radio;
     pz = cos(Ang)*Radio;
     Ang+=DesAng;
     glPushMatrix();
     
-    glTranslated(i, px, pz);
+    glTranslated(i, py, pz);
 basesn[j].render(quadObj);
 
 //bases[j++]->render(quadObj);
@@ -511,7 +532,7 @@ basesn[j].render(quadObj);
     glPopMatrix();
     glPushMatrix();
     
-    glTranslated(i, -px, -pz);
+    glTranslated(i, -py, -pz);
 complementos[j].render(quadObj);
 //bases[j++]->render(quadObj);
     //gluSphere (quadObj, 0.2,20,20); // Esfera Nativa de Open GL
@@ -521,16 +542,16 @@ complementos[j].render(quadObj);
 j++;
 if(Radio==RadioM){
 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.blanco);
-glVertex3f(i, px, pz);
-glVertex3f(i, -px, -pz);
+glVertex3f(i, py, pz);
+glVertex3f(i, -py, -pz);
 }
 glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
-glVertex3f(ai, apx, apz);
-glVertex3f(i, px, pz);
-glVertex3f(ai, -apx, -apz);
-glVertex3f(i, -px, -pz);
+glVertex3f(ai, apy, apz);
+glVertex3f(i, py, pz);
+glVertex3f(ai, -apy, -apz);
+glVertex3f(i, -py, -pz);
 ai=i;
-apx=px;
+apy=py;
 apz=pz;
 glEnd();
 	/*glDisable(GL_TEXTURE_GEN_S);
@@ -566,7 +587,10 @@ void Display_Render(SDL_Window* displayWindow) {
   gluLookAt(lx, ly, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0);
   //glBindTexture(GL_TEXTURE_2D, texID[0]);
   //gluSphere (quadObj, 4,40,40);
-  Giro();
+  switch(Estado){
+  case 0: Giro(); break;
+  case 1: Helica(); break;
+  }
   //ADN();
   SDL_GL_SwapWindow(displayWindow);//Actualiza el dibujo
 }
