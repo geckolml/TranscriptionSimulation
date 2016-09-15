@@ -514,7 +514,8 @@ void Poli(void){
       
     }
     complementos[j].render(quadObj);
-    if((torstep-0.2)<-p&&(torstep+0.12)>-p){
+/* 
+   if((torstep-0.2)<-p&&(torstep+0.12)>-p){
       //if(torstep<-p)
         //marnucl[NN+j].setlugar();
       if(false==marnucl[NN+j].getparada()){
@@ -523,6 +524,8 @@ void Poli(void){
       }
       
     }
+
+*/
     if(j>0){
     glBegin(GL_LINES);
     
@@ -547,7 +550,7 @@ glPopMatrix();
 glPushMatrix();
   glTranslated(torstep,0,-Radio);
   glRotatef(90,0.0,1.0,0.0);
-  glutSolidTorus(0.4, 1.0, 28, 28);
+//  glutSolidTorus(0.4, 1.0, 28, 28);
 glPopMatrix();
 torstep-=veltor;
   
