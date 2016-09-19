@@ -1,4 +1,5 @@
 //g++ ADN.cpp sphere.cpp -lGL -lGLU -lglut -lSDL2 -lfreeimage -std=c++11 -o Adn
+#include <bits/stdc++.h>
 #include <iostream>
 #include <cmath>
 #include <vector>
@@ -153,6 +154,28 @@ void marInit(){
   MNN=ix;
 }
 
+void setMarNucleotidos(){
+	string mar="";
+	for(int k=0; k<MAXMAR && nucleotido[k]!='\0'; k++){
+		if(nucleotido[k]=='A'){
+			mar+="T";
+		}if(nucleotido[k]=='T'){
+			mar+="A";
+		}if(nucleotido[k]=='C'){
+			mar+="G";
+		}if(nucleotido[k]=='G'){
+			mar+="C";
+		}
+	ofstream archivo;
+	archivo.open("MarN.txt");
+	archivo<<mar;
+	archivo<<"ATGCGGTGA";
+	archivo.close();
+
+		
+	}
+
+}
 
 // Dibujar
 bool init()
@@ -163,6 +186,7 @@ bool init()
   fichero = fopen("cadenaADN.txt","rt");
   fgets(nucleotido,MAX,fichero);
   fclose(fichero);
+  setMarNucleotidos();
   fichero = fopen("MarN.txt","rt");
   fgets(mar,MAXMAR,fichero);
   fclose(fichero);
