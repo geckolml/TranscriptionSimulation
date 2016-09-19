@@ -390,6 +390,7 @@ int Display_SetViewport(int width, int height) {
   if (height == 0) {
     height = 1;
   }
+  SDL_GetWindowSize(displayWindow,&width,&height);
   ratio = (GLfloat) width / (GLfloat) height;
   /* Setup our viewport. */
   glViewport(0, 0, (GLsizei) width, (GLsizei) height);
@@ -643,10 +644,6 @@ int main(int argc, char *argv[]) {
     }
   }
   if(quit)
-    for (int i=0;i<MNN;i++)
-  {
-    marnucl[i].direccion();
-  }
   close();
   return 0;
 }
