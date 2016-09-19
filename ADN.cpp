@@ -155,26 +155,24 @@ void marInit(){
 }
 
 void setMarNucleotidos(){
-	string mar="";
-	for(int k=0; k<MAXMAR && nucleotido[k]!='\0'; k++){
-		if(nucleotido[k]=='A'){
-			mar+="T";
-		}if(nucleotido[k]=='T'){
-			mar+="A";
-		}if(nucleotido[k]=='C'){
-			mar+="G";
-		}if(nucleotido[k]=='G'){
-			mar+="C";
-		}
-	ofstream archivo;
-	archivo.open("MarN.txt");
-	archivo<<mar;
-	archivo<<"ATGCGGTGA";
-	archivo.close();
+  string mar="";
+  for(int k=0; k<MAXMAR && nucleotido[k]!='\0'; k++){
+    if(nucleotido[k]=='A'){
+      mar+="T";
+    }else if(nucleotido[k]=='T'){
+      mar+="A";
+    }else if(nucleotido[k]=='C'){
+      mar+="G";
+    }else if(nucleotido[k]=='G'){
+      mar+="C";
+    }
+    ofstream archivo;
+    archivo.open("MarN.txt");
+    archivo<<mar;
+    archivo<<"ATGCGGTGA";
+    archivo.close();
 
-		
-	}
-
+  }
 }
 
 // Dibujar
@@ -416,6 +414,13 @@ void MarRender(){
     glPushMatrix();
     marnucl[i].render(quadObj);
     marnucl[i].test();
+    if(i>0&&marnucl[i].getparada()){
+    glBegin(GL_LINES);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+    glVertex3fv(marnucl[i-1].getPosv());
+    glVertex3fv(marnucl[i].getPosv());
+    glEnd();
+    }
   }
 }
 
@@ -475,7 +480,7 @@ void Helica(void){
       basesn[j].stop(i, 0.0, Radio,0.01);
       marnucl[j].setparada(i, 0.0, Radio*0.4,0.6);
       complementos[j].stop(i, 0.0, -Radio,0.01);
-      marnucl[2*NN-j-1].setparada(i, 0.0, -Radio*0.4,0.6);
+      //marnucl[2*NN-j-1].setparada(i, 0.0, -Radio*0.4,0.6);
     }   
     
     py = sin(Ang+AngInicial)*Radio;
@@ -523,8 +528,6 @@ void Poli(void){
     basesn[j].render(quadObj);
     p=basesn[j].getx();
     if((-torstep-0.15)<p&&(-torstep+0.2)>p){
-      //if(-torstep>p){
-      //  marnucl[j].setlugar();}
       if(false==marnucl[j].getparada()){
         marnucl[j].setdir();
         marnucl[j].setcompara(true);
