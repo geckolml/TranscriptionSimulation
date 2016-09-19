@@ -238,7 +238,7 @@ void TSphere::render(GLUquadric* g)
     glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
     glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
     gluSphere (g, radio,20,20);
-   // renderBitmapString(0.0,-0.4,0,GLUT_BITMAP_HELVETICA_18);
+    renderBitmapString(0.0,-0.4,0,GLUT_BITMAP_HELVETICA_18);
     glPopMatrix();
   }
 }
