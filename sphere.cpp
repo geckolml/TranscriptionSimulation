@@ -108,6 +108,9 @@ void TSphere::setcolor(char C)
   }
   if(C=='E'){
      color=colo.morado;
+  }
+  if(C=='U'){
+     color=colo.celeste;
   }	
 }
 void TSphere::stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s)
@@ -238,7 +241,7 @@ void TSphere::render(GLUquadric* g)
     glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
     glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
     gluSphere (g, radio,20,20);
-   // renderBitmapString(0.0,-0.4,0,GLUT_BITMAP_HELVETICA_18);
+    renderBitmapString(0.0,-0.4,0,GLUT_BITMAP_HELVETICA_18);
     glPopMatrix();
   }
 }
