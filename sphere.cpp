@@ -108,6 +108,9 @@ void TSphere::setcolor(char C)
   }
   if(C=='E'){
      color=colo.morado;
+  }
+  if(C=='U'){
+     color=colo.celeste;
   }	
 }
 void TSphere::stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s)
