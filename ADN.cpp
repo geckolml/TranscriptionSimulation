@@ -46,7 +46,7 @@ colores colore = {
 	{0.5f, 0.0f, 0.5f, 1.0f}
 	};
 GLuint Estado=0;
-GLuint Desna=0;//sirve para desnaturalizar la cadena al presionar 9
+//GLuint Desna=0;//sirve para desnaturalizar la cadena al presionar 9
 GLuint Rev=3;
 
 GLfloat Longi=6;
@@ -78,7 +78,7 @@ vector<TSphere> complementos;
 vector<TSphere> hidro;
 vector<TSphere> marnucl;
 TSphere helicasa(0.5,'E');
-//TSphere * bases[NUM_SPH];					//Dibujara la esfera
+
 float lx = 0.0, ly = -10.0; 				//Posiciones de la camara
 float r=10.0;						//Distancia de la camara con respecto al centro de la tierra
 float deltaMove = 0.0;				//Movimiento de la camara
@@ -91,8 +91,6 @@ SDL_Window* displayWindow=NULL;				//Ventana principal
 SDL_GLContext context;					//Aqui se dibuja
 float velmar = 0.2; 	
 bool init();
-
-//bool loadTextures();
 
 bool loadMedia();
 
@@ -201,7 +199,7 @@ bool init()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
     //Creacion de la ventana
-    displayWindow = SDL_CreateWindow("ADN", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN);
+    displayWindow = SDL_CreateWindow("ADN", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
     if( displayWindow == NULL )
     {
       std::cerr << "There was an error creating the window: " << SDL_GetError() << std::endl;
@@ -268,12 +266,12 @@ void handleKeys( SDL_Event& e )
       case SDLK_DOWN: deltaMove = 0.0; break;
       //case SDLK_LEFT: mVelX += DOT_VEL; break;
       //case SDLK_RIGHT: mVelX -= DOT_VEL; break;
-      case SDLK_8: 
+      /*case SDLK_8: 
       if( Desna == 0 )
       {
         Desna=1;
       }
-      else Desna=0; break;
+      else Desna=0; break;*/
       //Sirve para iniciar y pausar la musica
     }
   }
@@ -401,7 +399,7 @@ GLfloat helipos=-Longi*1.0;
 void Giro(void){
   int j;
   GLfloat Ang=0;
-  GLfloat i=-Longi,ai=-Longi;
+  GLfloat i=-Longi;
   //GLfloat apy= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
   if(AngInicial<-2*M_PI)
     AngInicial=0.0;
@@ -421,18 +419,15 @@ void Giro(void){
     hidro[j].setpos(i, 0.0, 0.0);
     hidro[j].render(quadObj,i, py, pz);
     if(j>0){
-    glBegin(GL_LINES);
+      glBegin(GL_LINES);
 
-    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
-    glVertex3fv(basesn[j-1].getPosv());
-    glVertex3fv(basesn[j].getPosv());
-    glVertex3fv(complementos[j-1].getPosv());
-    glVertex3fv(complementos[j].getPosv());
-    glEnd();
+      glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+      glVertex3fv(basesn[j-1].getPosv());
+      glVertex3fv(basesn[j].getPosv());
+      glVertex3fv(complementos[j-1].getPosv());
+      glVertex3fv(complementos[j].getPosv());
+      glEnd();
     }
-    ai=i;
-   // apy=py;
-   // apz=pz;
 
     i+=step;
   }
@@ -442,7 +437,7 @@ void Giro(void){
 void Helica(void){
   int j;
   GLfloat Ang=0;
-  GLfloat i=-Longi,ai=-Longi;
+  GLfloat i=-Longi;
   bool cont=true;
   if(AngInicial<-2*M_PI)
     AngInicial=0.0;
@@ -456,8 +451,7 @@ void Helica(void){
       marnucl[j].setparada(i, 0.0, Radio*0.4,0.6);
       complementos[j].stop(i, 0.0, -Radio,0.01);
       marnucl[2*NN-j-1].setparada(i, 0.0, -Radio*0.4,0.6);
-    }
-   
+    }   
     
     py = sin(Ang+AngInicial)*Radio;
     pz = cos(Ang+AngInicial)*Radio;
@@ -481,41 +475,39 @@ void Helica(void){
     glVertex3fv(complementos[j].getPosv());
     glEnd();
     }
-    ai=i;
+
     i+=step;
   }
-if(cont==true)
- Estado=2;
-MarRender();
-helicasa.setpos(helipos, 0.0, 0.0);
-helicasa.render(quadObj);
-helipos+=velhe;
-  
+  if(cont==true)
+    Estado=2;
+  MarRender();
+  helicasa.setpos(helipos, 0.0, 0.0);
+  helicasa.render(quadObj);
+  helipos+=velhe;
 }
 
 void Poli(void){
   int j;
   char c;
   GLfloat p;
-  GLfloat i=-Longi,ai=-Longi;
+  GLfloat i=-Longi;
   bool cont;
   
   for(j=0;j<NN;j++){
     cont=true;
     basesn[j].render(quadObj);
     p=basesn[j].getx();
-    if((-torstep-0.12)<p&&(-torstep+0.2)>p){
+    if((-torstep-0.15)<p&&(-torstep+0.2)>p){
       //if(-torstep>p){
       //  marnucl[j].setlugar();}
       if(false==marnucl[j].getparada()){
         marnucl[j].setdir();
         marnucl[j].setcompara(true);
       }
-      
     }
     complementos[j].render(quadObj);
 /* 
-   if((torstep-0.2)<-p&&(torstep+0.12)>-p){
+   if((torstep-0.2)<-p&&(torstep+0.15)>-p){
       //if(torstep<-p)
         //marnucl[NN+j].setlugar();
       if(false==marnucl[NN+j].getparada()){
@@ -528,7 +520,6 @@ void Poli(void){
 */
     if(j>0){
     glBegin(GL_LINES);
-    
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
     glVertex3fv(basesn[j-1].getPosv());
     glVertex3fv(basesn[j].getPosv());
@@ -542,107 +533,17 @@ void Poli(void){
   MarRender();
   glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
 
-glPushMatrix();
+  glPushMatrix();
   glTranslated(-torstep,0,Radio);
   glRotatef(90,0.0,1.0,0.0);
   glutSolidTorus(0.4, 1.0, 28, 28);
-glPopMatrix();
-glPushMatrix();
+  glPopMatrix();
+  glPushMatrix();
   glTranslated(torstep,0,-Radio);
   glRotatef(90,0.0,1.0,0.0);
 //  glutSolidTorus(0.4, 1.0, 28, 28);
-glPopMatrix();
-torstep-=veltor;
-  
-
-}
-void ADN(void){
-
-  GLfloat Ang=0;
-  glMaterialf(GL_FRONT,GL_SHININESS,0.5);
-  int j;
-  float i=-Longi,ai=-Longi;
-  float apy= -sin(Ang)*Radio,apz = cos(Ang)*Radio;
-   if(Desna==0&&Radio==RadioM)
-      DesAng+=0.001;
-   else if(Desna==1)
-      DesAng-=0.001;
-   
-   if(DesAng<0)
-      DesAng=0;
-   if(DesAng>DAng)
-      DesAng=DAng;
-
-   if(DesAng==0&&Desna==1)
-      Radio+=0.01;
-   if(DesAng==0&&Desna==0)
-      Radio-=0.01;
-   
-   if(Radio<RadioM)
-      Radio=RadioM;
-   if(Radio>2*RadioM)
-      Radio=2*RadioM;
- 
-    pz = cos(Ang)*Radio;
-for(j=0;j<NN;){
-    py = -sin(Ang)*Radio;
-    pz = cos(Ang)*Radio;
-    Ang+=DesAng;
-    glPushMatrix();
-    
-    glTranslated(i, py, pz);
-basesn[j].render(quadObj);
-
-//bases[j++]->render(quadObj);
-    //gluSphere (quadObj, 0.2,8,8); // Esfera Nativa de Open GL
-    glPopMatrix();
-    glPushMatrix();
-    
-    glTranslated(i, -py, -pz);
-complementos[j].render(quadObj);
-//bases[j++]->render(quadObj);
-    //gluSphere (quadObj, 0.2,20,20); // Esfera Nativa de Open GL
-    glPopMatrix();
-    glBegin(GL_LINES);
-//glLineWidth(20.0);
-j++;
-if(Radio==RadioM){
-glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.blanco);
-glVertex3f(i, py, pz);
-glVertex3f(i, -py, -pz);
-}
-glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
-glVertex3f(ai, apy, apz);
-glVertex3f(i, py, pz);
-glVertex3f(ai, -apy, -apz);
-glVertex3f(i, -py, -pz);
-ai=i;
-apy=py;
-apz=pz;
-glEnd();
-	/*glDisable(GL_TEXTURE_GEN_S);
-	glDisable(GL_TEXTURE_GEN_T);*/
-    i+=step;
-}
-
-MarRender();
-
-glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.morado);
-if(Radio==2*RadioM){
-glPushMatrix();
-  glTranslated(-torstep,0,Radio);
-  glRotatef(90,0.0,1.0,0.0);
-  glutSolidTorus(0.25, 0.75, 28, 28);
-glPopMatrix();
-glPushMatrix();
-  glTranslated(torstep,0,-Radio);
-  glRotatef(90,0.0,1.0,0.0);
-  glutSolidTorus(0.25, 0.75, 28, 28);
-glPopMatrix();
-torstep+=0.03;
-}
-
-  
+  glPopMatrix();
+  torstep-=veltor;
 }
 
 void Display_Render(SDL_Window* displayWindow) {
@@ -695,11 +596,12 @@ int main(int argc, char *argv[]) {
     else{
       SDL_GL_MakeCurrent(displayWindow, context);
       quit=Display_InitGL();
-      Display_SetViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
+      
       //Event handler
       SDL_Event e;
       while( !quit )
       {
+        Display_SetViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
         //Handle events on queue
         while( SDL_PollEvent( &e ) != 0 )
         {
@@ -713,8 +615,13 @@ int main(int argc, char *argv[]) {
         update();
         Display_Render(displayWindow);
       }
-	
+
     }
+  }
+  if(quit)
+    for (int i=0;i<MNN;i++)
+  {
+    marnucl[i].direccion();
   }
   close();
   return 0;

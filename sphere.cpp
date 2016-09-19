@@ -1,5 +1,7 @@
 #include <GL/glut.h>
 #include "sphere.h"
+#include <iostream>
+
 //GLuint pass=0;
 float shininess=18;
   GLfloat materialEmission[] = {0.0,0.0,0.0, 1.0};
@@ -84,29 +86,29 @@ TSphere::~TSphere()
 
 void TSphere::setcolor(char C)
 {
+  tipo=C;
   if(C=='A'){
     color=colo.azul;
-    colorpar='T';
+    tipopar='T';
   }
   if(C=='T'){
     color=colo.amarillo;
-    colorpar='A'; 
+    tipopar='A'; 
   }
   if(C=='C'){
     color=colo.rojo;
-    colorpar='G';
+    tipopar='G';
   }
   if(C=='G'){
     color=colo.verde;
-    colorpar='C';
+    tipopar='C';
   }
   if(C=='H'){
      color=colo.plomo;
   }
   if(C=='E'){
      color=colo.morado;
-  }
-	
+  }	
 }
 void TSphere::stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s)
 {
@@ -122,14 +124,14 @@ void TSphere::setpos(GLfloat x, GLfloat y, GLfloat z){
     pos[0]=x;
     pos[1]=y;
     pos[2]=z;
-  if(compara)
-  if((pos[0]>(parada[0]-del))&&
-  (pos[1]>(parada[1]-del))&&
-  (pos[2]>(parada[2]-del))&&
-  (pos[0]<(parada[0]+del))&&
-  (pos[1]<(parada[1]+del))&&
-  (pos[2]<(parada[2]+del)))
-    alto=true;
+    if(compara)
+      if((pos[0]>(parada[0]-del))&&
+        (pos[1]>(parada[1]-del))&&
+        (pos[2]>(parada[2]-del))&&
+        (pos[0]<(parada[0]+del))&&
+        (pos[1]<(parada[1]+del))&&
+        (pos[2]<(parada[2]+del)))
+        alto=true;
   }
 }
 
@@ -144,13 +146,10 @@ void TSphere::setparada(GLfloat x, GLfloat y, GLfloat z,  GLfloat s){
   del=s;
 }
 
-void TSphere::renderBitmapString(float x, float y, float z, void *font, char *string){
-  char *c;
+void TSphere::renderBitmapString(float x, float y, float z, void *font){
+  //char *c;
   glRasterPos3f(x,y,z);
-  for(c=string; *c != '\0';c++) {
-    glColor3f(1.0,1.0,1.0);
-    glutBitmapCharacter(font, *c);
-  }
+  glutBitmapCharacter(font, tipo);
 }
 
 
@@ -171,34 +170,49 @@ void TSphere::setdir(){
   dir[2] *= speed;
 }
 
-char TSphere::getcolorpar(){
-  return colorpar;
+char TSphere::gettipopar(){
+  return tipopar;
 }
 
 
 void TSphere::test()
-{if(!alto){
-  ((pos[0] < -maxpos) || (pos[0] > maxpos))?dir[0]*=-1:0;
-  ((pos[1] < -maxpos) || (pos[1] > maxpos))?dir[1]*=-1:0;
-  ((pos[2] < -maxpos) || (pos[2] > maxpos))?dir[2]*=-1:0;
-  
+{
+  if(!alto){
     pos[0] += dir[0];
     pos[1] += dir[1];
     pos[2] += dir[2];
-  if(compara)
-  if((pos[0]>(parada[0]-del))&&
-  (pos[1]>(parada[1]-del))&&
-  (pos[2]>(parada[2]-del))&&
-  (pos[0]<(parada[0]+del))&&
-  (pos[1]<(parada[1]+del))&&
-  (pos[2]<(parada[2]+del)))
-    alto=true;
-    if(alto){
-    pos[0] = parada[0];
-    pos[1] = parada[1];
-    pos[2] = parada[2];}
+    if(compara){
+      if((pos[0]>(parada[0]-del))&&
+        (pos[1]>(parada[1]-del))&&
+        (pos[2]>(parada[2]-del))&&
+        (pos[0]<(parada[0]+del))&&
+        (pos[1]<(parada[1]+del))&&
+        (pos[2]<(parada[2]+del))){
+        alto=true;
+        if(alto){
+          pos[0] = parada[0];
+          pos[1] = parada[1];
+          pos[2] = parada[2];
+	  compara=false;
+        }
+      }
+    }  
+    else{
+      ((pos[0] < -maxpos) || (pos[0] > maxpos))?dir[0]*=-1:0;
+      ((pos[1] < -maxpos) || (pos[1] > maxpos))?dir[1]*=-1:0;
+      ((pos[2] < -maxpos) || (pos[2] > maxpos))?dir[2]*=-1:0;
+    }
   }
 }
+
+void TSphere::direccion()
+{
+  if(!alto){
+  std::cout<< pos[0]<<" "<< pos[1]<<" "<< pos[2]<<std::endl;
+  std::cout<< dir[0]<<" "<< dir[1]<<" "<< dir[2]<<std::endl;
+  }
+}
+
 
 void TSphere::setlugar(){
     pos[0] = parada[0];
@@ -209,57 +223,45 @@ void TSphere::setlugar(){
 
 void TSphere::link()
 {
-  ((pos[0] < -maxpos) || (pos[0] > maxpos))?dir[0]*=-1:0;
-  ((pos[1] < -maxpos) || (pos[1] > maxpos))?dir[1]*=-1:0;
-  ((pos[2] < -maxpos) || (pos[2] > maxpos))?dir[2]*=-1:0;
-  pos[0] += dir[0];
-  pos[1] += dir[1];
-  pos[2] += dir[2];
+  
 }
 
 
 void TSphere::render(GLUquadric* g)
 {
-  char ms[2]="";
-  if(colorpar=='A')ms[0]='T';
-  else if(colorpar=='T')ms[0]='A';
-  else if(colorpar=='G')ms[0]='C';
-  else if(colorpar=='C')ms[0]='G';
-  else ms[0]=colorpar;
   if(dibujo){
-  glPushMatrix();
-  glTranslated(pos[0], pos[1], pos[2]);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
-  glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
-  glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
-  gluSphere (g, radio,20,20);
- // renderBitmapString(0,0.4,0,GLUT_BITMAP_HELVETICA_10,ms);
-  
-  glPopMatrix();
+    glPushMatrix();
+    glTranslated(pos[0], pos[1], pos[2]);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
+    glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
+    gluSphere (g, radio,20,20);
+   // renderBitmapString(0.0,-0.4,0,GLUT_BITMAP_HELVETICA_18);
+    glPopMatrix();
   }
 }
 //se usara para los puentes de hidrogeno
 void TSphere::render(GLUquadric* g, GLfloat x1, GLfloat y1, GLfloat z1)
 {
   if(dibujo){
-  glPushMatrix();
-  glTranslated(pos[0], pos[1], pos[2]);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
-  glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
-  glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
-  glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
-  gluSphere (g, radio,20,20);  
-  glPopMatrix();
+    glPushMatrix();
+    glTranslated(pos[0], pos[1], pos[2]);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, color);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
+    glMaterialfv(GL_FRONT, GL_EMISSION, materialEmission);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess); // parametro de brillantez
+    gluSphere (g, radio,20,20);  
+    glPopMatrix();
 
-  glBegin(GL_LINES);
-  glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
-  glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 25);
-  glVertex3f(x1, y1, z1);
-  glVertex3f(x1, -y1, -z1);
-  glEnd();
+    glBegin(GL_LINES);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, color);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 25);
+    glVertex3f(x1, y1, z1);
+    glVertex3f(x1, -y1, -z1);
+    glEnd();
   }
 }
 
