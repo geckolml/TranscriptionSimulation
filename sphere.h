@@ -24,7 +24,7 @@ private:
   bool dibujo;
   bool alto;
   bool compara;
-  TSphere * par;
+  //TSphere * par;
   GLfloat radio,del;
   GLfloat maxpos;
   GLfloat pos[3];
@@ -32,7 +32,8 @@ private:
   GLfloat dir[3];
   GLfloat speed;
   GLfloat* color;
-  char colorpar;
+  char tipo;
+  char tipopar;
 public:
   TSphere(GLfloat maxpos, GLfloat speed,GLfloat r);
   TSphere(GLfloat maxpos, GLfloat speed, GLfloat r,char c);
@@ -40,12 +41,13 @@ public:
   TSphere(GLfloat r);
   ~TSphere();
   void test();
-  void renderBitmapString(float x, float y, float z, void *font, char *string);
+  void renderBitmapString(float x, float y, float z, void *font);
   void setdibujo(bool v);
   void setcolor(char c);
   void setpos(GLfloat x, GLfloat y, GLfloat z);
   void setparada(GLfloat x, GLfloat y, GLfloat z, GLfloat s);
   void setdir();
+  void direccion();
   void setlugar();
   void setcompara(bool v);
   void stop(GLfloat x, GLfloat y, GLfloat z, GLfloat s);
@@ -56,6 +58,6 @@ public:
   float * getPosv();
   float getx();
   bool getparada();
-  char getcolorpar();
+  char gettipopar();
 };
 #endif
