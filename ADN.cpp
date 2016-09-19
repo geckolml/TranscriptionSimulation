@@ -158,7 +158,7 @@ void setMarNucleotidos(){
   string mar="";
   for(int k=0; k<MAXMAR && nucleotido[k]!='\0'; k++){
     if(nucleotido[k]=='A'){
-      mar+="T";
+      mar+="U";
     }else if(nucleotido[k]=='T'){
       mar+="A";
     }else if(nucleotido[k]=='C'){
@@ -169,7 +169,7 @@ void setMarNucleotidos(){
     ofstream archivo;
     archivo.open("MarN.txt");
     archivo<<mar;
-    archivo<<"ATGCGGTGA";
+    archivo<<"TTATGCGGTGA";
     archivo.close();
 
   }
