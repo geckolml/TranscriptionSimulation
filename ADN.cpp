@@ -1,4 +1,5 @@
-//g++ ADN.cpp sphere.cpp -lGL -lGLU -lglut -lSDL2 -lfreeimage -std=c++11 -o Adn
+//export OMP_NUM_THREADS=30
+//g++ ADN.cpp sphere.cpp -lGL -lGLU -fopenmp -lglut -lSDL2 -lfreeimage -std=c++11 -o Adn
 #include <bits/stdc++.h>
 #include <iostream>
 #include <cmath>
@@ -7,6 +8,7 @@
 #include <GL/glut.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
+#include <omp.h>
 #include "sphere.h"
 #define ESC 27
 #define NUM_SPH     60
@@ -122,6 +124,7 @@ void hidrogenos(){
 }
 
 void complementario(){
+#pragma omp parallel for
   for(int i =0; i < NN;i++){
     TSphere bas(0.2);
     if(nucleotido[i]=='A'){
@@ -140,6 +143,7 @@ void complementario(){
       bas.setcolor('C');
       comp_nucleotido[i]='C';
     }
+	#pragma omp critical
     complementos.push_back (bas);
   }
 }
@@ -385,6 +389,7 @@ int Display_SetViewport(int width, int height) {
   /* Height / width ration */
   GLfloat ratio;
   /* Protect against a divide by zero */
+
   if (height == 0) {
     height = 1;
   }
@@ -411,9 +416,12 @@ float torstep=1.5*Longi;
 void MarRender(){
   for (int i=0;i<MNN;i++)
   {
+
     glPushMatrix();
     marnucl[i].render(quadObj);
     marnucl[i].test();
+
+
     if(i>0&&marnucl[i].getparada()){
     glBegin(GL_LINES);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
@@ -425,7 +433,7 @@ void MarRender(){
 }
 
 GLfloat helipos=-Longi*1.0;
-
+int tid;
 void Giro(void){
   int j;
   GLfloat Ang=0;
@@ -437,30 +445,65 @@ void Giro(void){
     AngInicial-=0.01;
 
   for(j=0;j<NN;j++){
-    py = sin(Ang+AngInicial)*Radio;
-    pz = cos(Ang+AngInicial)*Radio;
-    Ang+=DesAng;
+//	tid=omp_get_thread_num();
+
+       Ang+=DesAng;
+     #pragma omp parallel sections shared(py,pz,Ang)
+     {
+      #pragma omp section
+       py = sin(Ang+AngInicial)*Radio;
+      #pragma omp section
+       pz = cos(Ang+AngInicial)*Radio;
+    }//termina parallel sections
+
+    #pragma omp parallel sections //shared(i,j,py,pz)
+  {
+     #pragma omp section
+     {
+   complementos[j].setpos(i, -py, -pz);
+   // complementos[j].render(quadObj);
+     }
+     #pragma omp section
+     {
     basesn[j].setpos(i, py, pz);
-    basesn[j].render(quadObj);
-
-    complementos[j].setpos(i, -py, -pz);
-    complementos[j].render(quadObj);
-
+   // basesn[j].render(quadObj);
+    }
+     
+    #pragma omp section
+    {
     hidro[j].setpos(i, 0.0, 0.0);
-    hidro[j].render(quadObj,i, py, pz);
+   // hidro[j].render(quadObj,i, py, pz);
+    }
+}
+
+    complementos[j].render(quadObj);
+    basesn[j].render(quadObj);
+    hidro[j].render(quadObj,i,py,pz);
+    
     if(j>0){
       glBegin(GL_LINES);
 
       glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colore.celeste);
+  omp_set_num_threads(4);
+//#pragma omp parallel sections shared(j)
+//{
+ //   #pragma omp section
+//{
       glVertex3fv(basesn[j-1].getPosv());
       glVertex3fv(basesn[j].getPosv());
+//}
+
+ //   #pragma omp section
+//{
       glVertex3fv(complementos[j-1].getPosv());
       glVertex3fv(complementos[j].getPosv());
+//    }
+//}
       glEnd();
-    }
-
-    i+=step;
-  }
+   }
+    
+	i+=step;
+}
   MarRender();
 }
 
@@ -475,17 +518,28 @@ void Helica(void){
     AngInicial-=0.01;
 
   for(j=0;j<NN;j++){
-    if(i<helipos+0.5){
+    
+   
+   if(i<helipos+0.5){
       hidro[j].setdibujo(false);
       basesn[j].stop(i, 0.0, Radio,0.01);
       marnucl[j].setparada(i, 0.0, Radio*0.4,0.6);
       complementos[j].stop(i, 0.0, -Radio,0.01);
       //marnucl[2*NN-j-1].setparada(i, 0.0, -Radio*0.4,0.6);
     }   
-    
-    py = sin(Ang+AngInicial)*Radio;
-    pz = cos(Ang+AngInicial)*Radio;
     Ang+=DesAng;
+   #pragma omp parallel sections
+   {
+     #pragma omp section
+	{
+    py = sin(Ang+AngInicial)*Radio;
+	}
+     #pragma omp section
+	{
+    pz = cos(Ang+AngInicial)*Radio;
+	}
+
+    } 
     basesn[j].setpos(i, py, pz);
     cont=basesn[j].getparada();
     basesn[j].render(quadObj);
@@ -507,6 +561,7 @@ void Helica(void){
     }
 
     i+=step;
+
   }
   if(cont==true)
     Estado=2;
@@ -523,8 +578,12 @@ void Poli(void){
   GLfloat i=-Longi;
   bool cont;
   
+//  #pragma omp parallel for ordered schedule(dynamic)
   for(j=0;j<NN;j++){
     cont=true;
+	//
+  //  #pragma omp ordered
+   // {
     basesn[j].render(quadObj);
     p=basesn[j].getx();
     if((-torstep-0.15)<p&&(-torstep+0.2)>p){
@@ -534,6 +593,7 @@ void Poli(void){
       }
     }
     complementos[j].render(quadObj);
+	
 /* 
    if((torstep-0.2)<-p&&(torstep+0.15)>-p){
       //if(torstep<-p)
@@ -572,6 +632,8 @@ void Poli(void){
 //  glutSolidTorus(0.4, 1.0, 28, 28);
   glPopMatrix();
   torstep-=veltor;
+	//
+//	}
 }
 
 void Display_Render(SDL_Window* displayWindow) {
@@ -603,9 +665,20 @@ void close()
 void update(void) 
 {
   if (deltaMove) { // update camera position
+	
+   #pragma omp parallel sections
+{
+    
+    #pragma omp section
     r += -(float)deltaMove * 0.1;
+    #pragma omp section
     lx = sin(angle)*r;
+    #pragma omp section
     ly = -cos(angle)*r;
+
+	}
+
+
   }
 }
 
